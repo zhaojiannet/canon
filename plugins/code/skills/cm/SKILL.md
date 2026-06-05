@@ -1,0 +1,16 @@
+---
+name: cm
+description: 分批分类按规范提交
+disable-model-invocation: true
+argument-hint: "[可选：限定文件或范围]"
+---
+
+把当前改动分批分类提交：
+
+- 先 `git status` + `git diff` 看清全部改动，按逻辑主题分组：一个 commit 只做一件事，无关改动不混在一起；改动跨多个不相关主题就拆成多个 commit。
+- 个人项目默认直接提交到当前分支；只有改动大或有风险、主分支受保护、或多人协作时，才先开分支。
+- 每条 commit message 按我全局 `~/.claude/CLAUDE.md` 里的 commit 规范写——那里有完整格式要求，照它执行，这里不重复。
+- 提交前把分组方案 + 每条 message 列给我看一眼。
+- 未经我明确同意不要 push。
+
+带参数时只提交指定的那部分，其余不动。
