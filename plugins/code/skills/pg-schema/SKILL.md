@@ -1,5 +1,5 @@
 ---
-name: postgresql-schema-design
+name: pg-schema
 description: Enforce PostgreSQL schema design conventions. Use this skill when editing **/migrations/*.sql, **/schema/*.sql, or when the user mentions table, column, primary key, foreign key, index, constraint, JSON column, jsonb, schema, ddl, CREATE TABLE, BIGSERIAL, UUID, timestamp. Forbids ad-hoc naming, missing FK constraints, SERIAL when BIGSERIAL works, missing timestamps, jsonb for structured first-class data, timestamp without time zone.
 paths:
   - "**/migrations/*.sql"

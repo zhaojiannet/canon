@@ -1,5 +1,5 @@
 ---
-name: vue-component-conventions
+name: vue
 description: Enforce Vue 3.5+ single-file component conventions (script setup, type-safe defineProps/defineEmits, defineModel for v-model, useTemplateRef for refs, composition API only). Use this skill when editing .vue files, or when the user mentions Vue component, props, emits, v-model, ref, computed, watch, composable, script setup, Options API, mixin, or asks to write/refactor any Vue component. Forbids Options API, mixins, untyped props, withDefaults when 3.5+ destructure works, manual ref strings.
 paths:
   - "**/*.vue"

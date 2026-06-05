@@ -1,5 +1,5 @@
 ---
-name: echo-handler-patterns
+name: echo
 description: Enforce Echo v5 handler conventions for Go, with focus on Echo's error-handling model. Use this skill when editing .go files (handler/route/middleware/server code), or when the user mentions Echo, HandlerFunc, c.JSON, c.Bind, middleware, route group, HTTPError, HTTPErrorHandler, errors.Is, errors.As, error wrap, sentinel error, graceful shutdown, echo.New. Forbids manual JSON error responses (use HTTPError + HTTPErrorHandler), err.Error() string comparison, swallowed errors, return without wrap, panic-on-error in handlers, e.Start without graceful shutdown.
 paths:
   - "**/*.go"

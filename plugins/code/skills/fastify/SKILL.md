@@ -1,5 +1,5 @@
 ---
-name: fastify-plugin-patterns
+name: fastify
 description: Enforce Fastify v5 plugin and route conventions for Node/TypeScript. Use this skill when editing .ts/.js/.mjs files that import 'fastify' or '@fastify/*', or when the user mentions Fastify, plugin, route, schema validation, decorate, encapsulation, fastify-plugin, fp, hooks, lifecycle, addHook, register. Forbids manual JSON validation when schema works, missing fp wrapper for cross-scope decorators, sync handler with done callback when async fits, lifecycle hooks at app root that should be plugin-scoped.
 paths:
   - "**/*.ts"

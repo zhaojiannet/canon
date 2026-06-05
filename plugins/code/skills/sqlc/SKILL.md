@@ -1,5 +1,5 @@
 ---
-name: sqlc-codegen-rules
+name: sqlc
 description: Enforce sqlc codegen conventions for Go + PostgreSQL. Use this skill when editing sqlc.yaml, **/queries/*.sql, or generated *.sql.go files, or when the user mentions sqlc, queries, codegen, db.Queries, GetX/ListX/CreateX, generated SQL, sql.gen.go, sqlc generate, sqlc vet, Querier interface. Forbids hand-written database/sql calls when sqlc is configured, version 1 config, manual edits to generated files.
 paths:
   - "**/sqlc.yaml"

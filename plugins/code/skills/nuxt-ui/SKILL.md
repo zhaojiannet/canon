@@ -1,5 +1,5 @@
 ---
-name: prefer-nuxt-ui
+name: nuxt-ui
 description: Enforce Nuxt UI v4 component-first conventions. Use this skill when editing .vue files in Vue/Nuxt projects, or when the user mentions Nuxt UI, button, input, modal, card, drawer, dropdown, tooltip, form, table, toast, slideover, popover, navigation, dashboard, U-prefix component, or asks to build any UI element. Forbids hand-written raw <button>/<input>/<select>/<dialog>/<table> when Nuxt UI provides an equivalent. Forces U-prefix components and STOP-and-ask when no Nuxt UI component fits.
 paths:
   - "**/*.vue"
