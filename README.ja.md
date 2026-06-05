@@ -1,106 +1,138 @@
-# claude-skills
+# canon
 
-> Claude Code に Tailwind v4 / Nuxt UI v4 / Vue 3.5 / TypeScript 6 / Go Echo v5 / Fastify v5 / PostgreSQL / Astro 6 の公式推奨パターンと**歩調を揃えて**コードを書かせる skill 集。ファイルタイプごとに自動で読み込まれ、最新版の公式パターンを強制し、deprecated API、独自 CSS、迂回構文を禁止します。コードネームは `lockstep-run`（「歩調を揃えて走る」）。
+> Claude Code に規範を守らせる。2 つの plugin：`canon` はコードの書き方を管理し、フレームワーク公式の最新パターンに強制的に従わせます。`canon-chinese` は中国語の表現を管理し、平易な口語を強制して、インターネット隠語や AI 口調を厳禁します。
 
 **Languages**: [简体中文](README.md) · [繁體中文](README.zh-Hant.md) · [English](README.en.md) · **日本語**
 
-> メンテナンス：[zhaoJian](https://www.zhaojian.net) · リポジトリ：https://github.com/zhaojiannet/claude-skills
+> メンテナンス：[zhaoJian](https://www.zhaojian.net) · リポジトリ：https://github.com/zhaojiannet/canon
 
-## 何を解決するか
+## これは何か
 
-開発でよく出会う場面があります。Tailwind、Nuxt UI、Vue、TypeScript、Echo、Fastify、PostgreSQL は公式が一番直接的な書き方を提示しているのに、AI は長い context のあと忘れて、独自 CSS、公式 API の迂回、一世代前の構文を書き始めます。気づくたびに手で直すしかありません。CLAUDE.md やプロジェクトメモリのようなソフトな制約は、長い会話のあとでは効きません。
+`canon`（canonical「正典・規範のやり方に従う」から）という名前の Claude Code プラグインマーケットプレイスです。下記の 2 つの独立した plugin があり、それぞれ別々にインストールできます：
 
-`claude-skills` は Claude Code 公式の [skill 機構](https://code.claude.com/docs/en/skills) でこの問題を解決します。各 skill はファイルタイプ `paths` で自動読み込みされる markdown のルール文書です。`.vue` を開けば Vue と Nuxt UI のルールが、`.css` / `.scss` を開けば Tailwind のルールが、`.go` を開けば Echo / sqlc のルールが、`migrations/*.sql` を開けば PostgreSQL migration 安全のルールが context に入ります。ファイルを開くたびに読み直されるので、CLAUDE.md のように会話の途中で薄れません。
+| Plugin | 何を管理するか | どう効くか |
+|---|---|---|
+| **`canon`** | コードの書き方：10 個の framework skill で、Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Go Echo v5 + sqlc / Node Fastify v5 / PostgreSQL / Astro をそれぞれの公式最新安定版の推奨パターンに強制し、deprecated な書き方を禁止。さらに手動ワークフローコマンド `go`/`cm` を 2 つ同梱 | framework skill は対応するファイルを編集すると `paths` に従って自動的に有効化。`go`/`cm` は `/canon:go`、`/canon:cm` で手動呼び出し |
+| **`canon-chinese`** | 中国語の表現：平易な中国語を強制し、インターネット隠語・職場隠語・AI 口調を禁止しつつ、本物の専門用語は保持 | 一つの output-style で、有効にすると常に効く |
 
-これで AI は古い書き方や、公式コンポーネントを迂回した手作りに戻れなくなります。
+両者は同じことです——Claude にルールを課し、妥協させない。一方はコードの中の deprecated な書き方を、もう一方は中国語の中の隠語を片づけます。
 
-## こんな人におすすめ
+---
 
-- **Vue / Nuxt** プロジェクトで、AI に `<style scoped>` を書かせたくない、Nuxt UI コンポーネントを迂回して `<button>` / `<input>` を生で書かせたくない
-- **Tailwind v4** プロジェクトで、AI に `bg-opacity-50` / `bg-gradient-to-r` などの deprecated utility を書かせたくない
-- **TypeScript** プロジェクトで、AI に `any` / `as any` / `@ts-ignore` を使わせたくない
-- **Go + Echo v5** バックエンドで、handler ごとに JSON エラー応答を手書きする代わりに、`HTTPError` と集中型 `HTTPErrorHandler` を使わせたい
-- **PostgreSQL** + migrations で、AI に裸の `DROP TABLE` や本番をロックする一発 `ALTER TABLE ... NOT NULL` を書かせたくない
-- 同じ手のずれを毎ファイル直すのに飽きた
+## canon（コード規範）
 
-## Installation
+### 何を解決するか
 
-Claude Code の中で実行してください：
+コードを書いていると繰り返しこういう状況に出会います。Tailwind、Nuxt UI、Vue、TypeScript、Echo、Fastify、PostgreSQL は公式が一番直接的な書き方を提示しているのに、AI は長い会話のあと忘れて、独自 CSS を書き、公式 API を迂回し、一世代前の構文を書き始めます。気づくたびに手で直すしかありません。CLAUDE.md やグローバルメモリのようなソフトな制約は、長い会話のあとでは効きません。
+
+`canon` は Claude Code 公式の [skill 機構](https://code.claude.com/docs/en/skills) でこれを解決します。各 skill はファイルタイプ `paths` で自動的に有効化される markdown のルール文書です。`.vue` を編集すれば Vue / Nuxt UI のルールが、`.css` を編集すれば Tailwind のルールが、`.go` を編集すれば Echo / sqlc のルールが、`migrations/*.sql` を編集すれば PostgreSQL migration 安全のルールが context に入ります。ルールはその場で読んで使うので、CLAUDE.md のように長い会話の途中で薄れることがありません。
+
+### インストール
 
 ```bash
 # 1. marketplace を登録
-/plugin marketplace add zhaojiannet/claude-skills
+/plugin marketplace add zhaojiannet/canon
 
-# 2. 唯一の plugin をインストール（10 個の skill を含む）
-/plugin install lockstep-run@lockstep-run
+# 2. コード規範 plugin をインストール（10 個の framework skill + go/cm ワークフローコマンドを全部含む）
+/plugin install canon@canon
 
 # 3. 再読み込みして有効化
 /reload-plugins
 ```
 
-> v0.4 から 7 個の plugin を 1 個の `lockstep-run` plugin に統合しました。skill はすべてファイル `paths` で自動的に有効化されるため、プロジェクトのスタックに関係なく一度のインストールで完了します。  
-> 旧版（v0.3 以前）で `vue-skills` / `tailwind-skills` / `typescript-skills` / `go-skills` / `node-skills` / `postgres-skills` / `astro-skills` をインストールしていた場合は、先に全部アンインストールしてから新版を入れてください（下記 Upgrade を参照）。
+確認：`/plugin` を入力して **Installed** タブを開くと `canon` が見えます。さらに `What skills are available?` を Claude に聞けば skill 一覧が出ます。
 
-確認：`/plugin` を入力して **Installed** タブで `lockstep-run` が確認できます。`What skills are available?` を Claude に聞けば、利用できる skill 一覧が出ます。
+### 含まれる skill
 
-## Upgrade（v0.3 からのアップグレード）
+| Skill | トリガー paths | 機能 | 手動呼び出し |
+|---|---|---|---|
+| `vue` | `**/*.vue` | Vue 3.5+ SFC：`<script setup>` + 型ベース `defineProps`/`defineEmits` + `defineModel` + `useTemplateRef` を強制。Options API / mixins を禁止 | `/canon:vue` |
+| `nuxt-ui` | `**/*.vue` | Nuxt UI v4 コンポーネント（U 接頭辞）の使用を強制し、生の `<button>` / `<input>` / `<dialog>` の手書きを禁止 | `/canon:nuxt-ui` |
+| `tailwind` | `.vue/.html/.tsx/.css/.scss` | Tailwind v4 utility-first：`<style scoped>` / 旧 utility / 任意値変数を禁止。`oklch()` / `(--xxx)` 括弧構文 / `@custom-variant dark` を強制 | `/canon:tailwind` |
+| `typescript` | `**/*.ts, .tsx` | TypeScript strict：`any` / `@ts-ignore` / namespace / 非 const enum を禁止。strict tsconfig + `unknown` で any を代替することを強制 | `/canon:typescript` |
+| `echo` | `**/*.go` | Echo v5 エラー処理：error の冒泡、`echo.NewHTTPError` でエラーを統一、集中型 `HTTPErrorHandler`、`errors.Is`/`errors.As`、`%w` wrap | `/canon:echo` |
+| `sqlc` | `**/queries/*.sql, sqlc.yaml` | sqlc v2 + pgx/v5 + 命名規約 + 手書き SQL 呼び出しの禁止 | `/canon:sqlc` |
+| `fastify` | fastify を import する `.ts/.js` | Fastify v5 plugin の async 書法、`fastify-plugin` (fp) を使うべきタイミング、JSON schema 検証、encapsulation、graceful onClose | `/canon:fastify` |
+| `pg-schema` | `**/migrations/*.sql, **/schema/*.sql` | snake_case + BIGSERIAL/UUID PK + timestamptz + 外部キー ON DELETE の明示 + jsonb は schemaless にのみ使用 | `/canon:pg-schema` |
+| `pg-migrate` | `**/migrations/*.sql` | トランザクション包囲 + IF EXISTS ガード + 裸の DROP/TRUNCATE 禁止 + NOT NULL 追加は 3 ステップ + `CREATE INDEX CONCURRENTLY` | `/canon:pg-migrate` |
+| `astro` | `**/*.astro` | Astro 静的優先：デフォルト zero JS、`client:visible`/`client:idle` を `client:load` より優先、`server:defer` で全ページ SSR を代替、Content Collections で `Astro.glob` を代替 | `/canon:astro` |
+
+有効化の方法：
+
+- **自動**：`paths` にマッチするファイルを編集すると Claude Code が対応する skill を自動的に context に読み込みます
+- **手動**：`/canon:<skill-name>`、例：`/canon:echo`
+
+### ワークフローコマンド（手動トリガー）
+
+ファイルタイプで自動有効化される 10 個の framework skill とは別に、canon は手動ワークフローコマンドを 2 つ同梱しています。これらは `disable-model-invocation: true` を設定しており、`/` を入力したときだけ呼び出され、Claude が自動トリガーすることはなく、description も context に入りません——`/` メニューのラベルでしかありません。
+
+| コマンド | 機能 | 呼び出し |
+|---|---|---|
+| `go` | タスク全体を貫く作業規律：着手前に公式の最新ドキュメントを確認し、その場しのぎより最善の方法を選ぶ。何かが壊れたときはごまかしたり迂回したりしない。自分のミスは自分で引き受ける。作業が未完了なら、成功を装わず正直に報告する | `/canon:go` |
+| `cm` | 現在の変更をグループ分け・分類してコミット：トピックごとにまとめ、関心事 1 つにつき 1 コミット、各メッセージを規約どおりに書き、コミット前にプランを提示し、同意なしに push しない | `/canon:cm` |
+
+> この 2 つは作者個人のワークフローコマンドです。`go` は誰でも使える一般的な規律です。`cm` のコミットメッセージ書式は作者のグローバルな `~/.claude/CLAUDE.md` のルールを参照しているので、自分のコミット規約に差し替えてください。
+
+---
+
+## canon-chinese（平易な中国語）
+
+### 何をするか
+
+Claude Code に平易な中国語を強制し、インターネット隠語と職場隠語（根因、二开、兜底、对齐、抓手、闭环、赋能、沉淀、链路、落地……）を禁止しつつ、本物の専門用語（解耦、幂等、并发、复用……）は保持して、行き過ぎないようにします。さらに AI 特有の作り口調や口癖（底层逻辑、本质上、「不是 X 而是 Y」というマウント構文、「综上所述」というまとめ口調……）も専門に管理します。
+
+中核は一つの [output-style](https://code.claude.com/docs/en/output-styles) です。output-style は Claude Code のシステムプロンプトを直接書き換えるため、CLAUDE.md（ユーザーメッセージ層）より制約力が強く、現時点で Claude の言い回しを安定して左右できる唯一の公式手段です。
+
+はっきり言っておくべきこと：**100% 根絶できる方法は存在しません**。モデルは確率的にテキストを生成するもので、プロンプトによる制約は「強い傾向」であって、ハードなフィルターではありません。この plugin は制約力が最も強いソフトな手段を使っており、この種の語をほぼ絶滅させられますが、たまに 1〜2 個漏れることはあり得ます。
+
+### インストール
 
 ```bash
-# 1. 旧 7 plugin をアンインストール
-/plugin uninstall vue-skills@lockstep-run
-/plugin uninstall tailwind-skills@lockstep-run
-/plugin uninstall typescript-skills@lockstep-run
-/plugin uninstall go-skills@lockstep-run
-/plugin uninstall node-skills@lockstep-run
-/plugin uninstall postgres-skills@lockstep-run
-/plugin uninstall astro-skills@lockstep-run
+# marketplace を登録済みならこのステップは飛ばす
+/plugin marketplace add zhaojiannet/canon
 
-# 2. marketplace を最新にする
-/plugin marketplace update lockstep-run
-
-# 3. 統合された plugin をインストール
-/plugin install lockstep-run@lockstep-run
-
-# 4. 再読み込み
+# 平易な中国語 plugin をインストール
+/plugin install canon-chinese@canon
 /reload-plugins
 ```
 
-## Skills
+### 有効化
 
-| Skill | トリガー paths | 内容 |
-|---|---|---|
-| `prefer-nuxt-ui` | `**/*.vue` | Vue ファイル内で Nuxt UI v4 コンポーネント（U 接頭辞 121 個）を強制し、生の `<button>` / `<input>` / `<dialog>` の手書きを禁止 |
-| `tailwind-utility-first` | `**/*.vue, .html, .tsx, .css, .scss` | Tailwind v4 utility-first。`<style scoped>`、散在する raw CSS、`[var(--xxx)]`、旧版 utility を禁止。`oklch()` カラー、`(--xxx)` 括弧構文、`@custom-variant dark`、Vite では `@tailwindcss/vite` を強制 |
-| `vue-component-conventions` | `**/*.vue` | Vue 3.5+ SFC。`<script setup>` + 型ベース `defineProps`/`defineEmits` + `defineModel` + `useTemplateRef` を強制。Options API、mixin、`PropType` を禁止 |
-| `typescript-strict-rules` | `**/*.ts, .tsx` | TypeScript strict。`any`、`@ts-ignore`、namespace、非 const enum を禁止。strict tsconfig、`unknown` を `any` の代わり、型推論を強制 |
-| `echo-handler-patterns` | `**/*.go` | Echo v5 エラー処理モデル。handler は error を return し冒泡、`echo.NewHTTPError` でクライアント向けエラー、独自 `HTTPErrorHandler` で応答形式を集中、`errors.Is`/`errors.As` で業務エラー判別、`%w` wrap chain |
-| `sqlc-codegen-rules` | `**/queries/*.sql, sqlc.yaml` | sqlc v2 + pgx/v5 + 命名規約（Get/Find/List/Count/Create/Update/Delete）+ sqlc が扱える場合は手書き SQL を禁止 |
-| `fastify-plugin-patterns` | fastify を import する `.ts/.js` | Fastify v5 async plugin、必要な場合の `fastify-plugin` (fp)、JSON schema 検証、encapsulation、graceful onClose |
-| `postgresql-schema-design` | `**/migrations/*.sql, **/schema/*.sql` | snake_case + BIGSERIAL/UUID PK + timestamptz + 明示的な外部キー ON DELETE + jsonb は schemaless データのみ |
-| `postgresql-migration-safety` | `**/migrations/*.sql` | トランザクション包囲 + IF EXISTS ガード + 裸の DROP/TRUNCATE 禁止 + NOT NULL 追加は 3 ステップ + `CREATE INDEX CONCURRENTLY` + カラム名変更は 2 段階 |
-| `astro-static-first` | `**/*.astro` | Astro 6+ 静的優先。デフォルト zero JS、`client:visible`/`client:idle` を `client:load` より優先、`server:defer` を全ページ SSR の代わり、Content Collections を `Astro.glob` の代わり |
+この plugin の output-style は `force-for-plugin: true` を設定しているので、**インストールして有効にすれば自動的に効き、手動で選ぶ必要はありません**。現在の output-style 設定を上書きします。
 
-起動方法：
+> output-style はシステムプロンプトの一部で、Claude Code は会話を開始するたびに一度読み込みます。変更後は `/clear` するか新しい会話を始めないと反映されません。
 
-- **自動**：`paths` glob にマッチするファイルを編集すると Claude Code が自動的に skill を context に読み込みます
-- **手動**：`/lockstep-run:<skill-name>` の形で呼び出します。例：`/lockstep-run:echo-handler-patterns`
+一時的に切りたいとき：`/plugin` の中で `canon-chinese` を無効化します。自分で output-style を手動管理したいとき（自動強制ではなく）：`plugins/chinese/output-styles/plain-chinese.md` の中の `force-for-plugin: true` を削除し、`/config` → Output style で手動選択に切り替えます。
+
+> 注意：旧来の `/output-style` コマンドは Claude Code v2.1.73 で deprecated、v2.1.91 で削除され、現在は `/config` に統一されています。
+
+---
+
+## 旧版（lockstep-run）からの移行
+
+この repo は以前 `claude-skills`、marketplace は `lockstep-run` という名前でした。`canon` にアップグレードするには：
+
+```bash
+# 1. 旧 plugin をアンインストール
+/plugin uninstall lockstep-run@lockstep-run
+
+# 2. 旧 marketplace を削除
+/plugin marketplace remove lockstep-run
+
+# 3. 新 marketplace を登録してインストール
+/plugin marketplace add zhaojiannet/canon
+/plugin install canon@canon
+/plugin install canon-chinese@canon
+/reload-plugins
+```
+
+skill の呼び出し名も短くなりました：`/lockstep-run:tailwind-utility-first` → `/canon:tailwind`。
 
 ## How it works
 
-各 skill は markdown のルール文書で、次のセクションを含みます：
+`canon` の各 skill は markdown のルール文書で、次を含みます：核心原則、禁止項目 + 簡潔な理由、旧 API → 新 API の対応表、表現できないときは迂回せず報告する STOP シグナル、シナリオ別ルール、書き終えたあとの自己チェック用 grep リスト。Claude Code は `paths` にマッチするファイルを編集するときに該当する SKILL.md を context に読み込みます。常時占有するのではなく、必要なときに読み込みます。
 
-- **Core principles**：核心原則（「何を使うか」）
-- **Forbidden patterns**：禁止項目（「何を避けるか」）と簡潔な理由
-- **Deprecated → Current**：旧 API → 新 API の対応表
-- **STOP signal**：utility / 公式 API で表現できないときは回避せず報告
-- シナリオ別ルール：Tailwind の Preflight デフォルト、Vue の decomposition triggers、PostgreSQL の NOT NULL 追加 3 ステップ法、Echo の HTTPErrorHandler テンプレート
-- **検証 grep**：編集後の自己チェック用コマンド一覧
-
-Claude Code は `paths` にマッチするファイルを開いたときに該当する SKILL.md を context に読み込みます。CLAUDE.md のように常時 load されるのではなく、ファイルタイプごとに必要なときだけ load されます。
-
-## Roadmap
-
-初版の 10 skill で主流の前後端スタック（Vue / Tailwind / TypeScript / Go+Echo+sqlc / Node+Fastify / PostgreSQL / Astro）をカバー済みです。今後は実利用フィードバックに応じて追加します。
+`canon-chinese` の output-style は、禁止語の対応表、AI 口癖リスト、専門用語のホワイトリスト、セルフチェックリストをシステムプロンプトに追加し、毎ターンの返信で効きます。
 
 ## Development
 
@@ -108,21 +140,22 @@ Claude Code は `paths` にマッチするファイルを開いたときに該�
 
 ```bash
 cd <あなたのプロジェクト>
-claude --plugin-dir ~/Cores/Projects/claude-skills
+claude --plugin-dir ~/Cores/Projects/canon/plugins/code \
+       --plugin-dir ~/Cores/Projects/canon/plugins/chinese
 ```
 
-SKILL.md を編集したら、起動中の Claude Code で `/reload-plugins` を実行すれば反映されます。
+SKILL.md や output-style を編集したら、起動中の Claude Code で `/reload-plugins` を実行すれば反映されます。構造を検証するには：`claude plugin validate .`。
 
-起動デバッグ：`What skills are available?` を Claude に聞いて現在 load されている skill を確認できます。発火しない・発火しすぎるときは SKILL.md の `description` キーワードや `paths` glob を調整してください。
-
-公式リファレンス：[Skills](https://code.claude.com/docs/en/skills) / [Plugins](https://code.claude.com/docs/en/plugins) / [Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)。
+公式リファレンス：[Skills](https://code.claude.com/docs/en/skills) / [Plugins](https://code.claude.com/docs/en/plugins) / [Plugin Marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) / [Output styles](https://code.claude.com/docs/en/output-styles)。
 
 ## 名前の由来
 
-`lockstep` は「歩調が合った状態」「歩調を揃えて行進する」という意味で、この skill によく合います。けれども書きながら、大学軍事訓練時代の親友、薛貴文（通称：跑哥）を思い出しました。教官が真顔で彼に系全員の号令をかけさせたとき、彼は「歩調を揃えて行進」と言うべきところを N 回連続で「歩調を揃えて走る」と叫び、その日から伝説の「跑哥（走る兄貴）」になりました。
+`canon` は canonical——「正典・規範のやり方に従う」から取りました。2 つの plugin は同じことです：コードは公式の規範どおりに書き、中国語は平易な規範どおりに話す。
 
-この名前は跑哥に贈ります。汗まみれで焼け付くような夏、思い切り叫んでいたあの夏、もう二度と戻れないあの夏のために。
+このプロジェクトの前身のコードネームは `lockstep`（「歩調を揃えて進め」）でした。改名するとき、私の親友、薛貴文（通称：跑哥／パオゴー）を思い出しました。大学の軍事訓練で、教官が真顔で彼に系全員の号令をかけさせたとき、彼は「齐步走（歩調をそろえて進め）」と言うべきところを N 回連続で「齐步跑（歩調をそろえて走れ）」と叫び、その日から伝説の跑哥（走る兄貴）になりました。
 
 ## License
 
 MIT
+</content>
+</invoke>

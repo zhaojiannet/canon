@@ -1,5 +1,5 @@
 ---
-name: astro-static-first
+name: astro
 description: Enforce Astro static-first conventions for .astro files. Use this skill when editing .astro files, or when the user mentions Astro, island, hydration, client directive, client:load, client:visible, client:idle, client:only, server:defer, content collections, getStaticPaths, getCollection, SSR, prerender. Forbids client:load when client:visible/client:idle would do, full-page hydration, hydration without actual interactivity, Astro.glob over getCollection.
 paths:
   - "**/*.astro"

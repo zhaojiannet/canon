@@ -1,5 +1,5 @@
 ---
-name: typescript-strict-rules
+name: typescript
 description: Enforce TypeScript strict type-checking. Use this skill when editing .ts or .tsx files, configuring tsconfig.json, or when the user mentions TypeScript, type, any, unknown, strict mode, type assertion, generics, namespace, enum, ts-ignore, ts-expect-error, type guard, PropType. Forbids any, as any, // @ts-ignore, namespace, non-const enum, untyped catch. Forces strict tsconfig, unknown over any, type inference, ESM imports, const + as const over enum.
 paths:
   - "**/*.ts"

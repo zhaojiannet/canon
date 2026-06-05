@@ -1,5 +1,5 @@
 ---
-name: tailwind-utility-first
+name: tailwind
 description: Enforce Tailwind CSS v4 utility-first conventions. Use this skill when editing .vue, .astro, .html, .tsx, .jsx, .css, .scss files, or when the user mentions Tailwind, utility class, custom CSS, raw CSS, <style> block, <style scoped>, scoped style, sibling selector (a + b), adjacent selector, child selector, theme variable, gradient, dark mode, container query, hover/focus, spacing/margin/padding, or asks to style any UI element / fix layout / tweak spacing. Forbids <style> blocks (scoped or unscoped) in .vue/.astro/.html when a utility class or arbitrary value would do, scattered raw CSS, [var(--xxx)] arbitrary values, deprecated utilities (bg-opacity-*, flex-shrink-*, bg-gradient-to-r), theme() function in CSS, !-prefix important. Forces oklch() colors, paren syntax bg-(--var), slash-opacity bg-color/50, @custom-variant dark in CSS, @tailwindcss/vite for Vite, @theme tokens for reused arbitrary values. Do NOT use for projects without Tailwind v4, pure backend code, or non-styling refactors.
 paths:
   - "**/*.vue"

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "canon",
+  "description": "Strict conventions enforcing the latest official APIs across Vue 3.5, Nuxt UI v4, Tailwind v4, TypeScript, Go Echo v5 + sqlc, Node Fastify v5, PostgreSQL schema + migrations, and Astro. Framework skills auto-activate by file path, plus two manual workflow commands (/canon:go, /canon:cm) that trigger only on demand. Forbids deprecated patterns (<style scoped>, any, @ts-ignore, bg-opacity-*, bare DROP TABLE, single-shot ALTER TABLE ... NOT NULL); forces current best practices (<script setup> + defineModel, oklch() colors, Echo HTTPErrorHandler, sqlc generated Querier, three-step NOT NULL migrations, client:visible / server:defer).",
+  "version": "0.5.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "vue",
+    "nuxt-ui",
+    "tailwind",
+    "typescript",
+    "astro",
+    "echo",
+    "sqlc",
+    "fastify",
+    "postgresql",
+    "best-practices"
+  ]
+}

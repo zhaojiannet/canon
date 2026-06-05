@@ -1,32 +1,24 @@
 {
-  "name": "lockstep-run",
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "canon",
+  "description": "Canon: enforce the canonical way. A code plugin that locks Claude onto the latest official framework APIs, and a Chinese plugin that forces plain, jargon-free writing.",
+  "version": "0.5.0",
   "owner": {
     "name": "zhaoJian",
-    "email": "x@zhaojian.net",
-    "url": "https://www.zhaojian.net"
-  },
-  "metadata": {
-    "description": "Strict skill marketplace enforcing latest official APIs across modern web stacks. A single plugin bundles every skill: deprecated patterns are forbidden, current best practices are forced.",
-    "version": "0.4.3"
+    "email": "x@zhaojian.net"
   },
   "plugins": [
     {
-      "name": "lockstep-run",
-      "description": "Strict conventions for Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Go Echo v5 + sqlc / Node Fastify v5 / PostgreSQL schema+migrations / Astro 6. Each skill activates by file path. Forbids <style scoped>, any, @ts-ignore, bg-opacity-*, bg-gradient-to-*, hand-written raw <button>/<input> when Nuxt UI applies, bare DROP TABLE, single-shot ALTER TABLE ... NOT NULL. Forces <script setup> + defineModel, oklch() colors, Echo HTTPErrorHandler, sqlc generated Querier, three-step NOT NULL migrations, client:visible / server:defer over client:load.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/prefer-nuxt-ui",
-        "./skills/vue-component-conventions",
-        "./skills/tailwind-utility-first",
-        "./skills/typescript-strict-rules",
-        "./skills/echo-handler-patterns",
-        "./skills/sqlc-codegen-rules",
-        "./skills/fastify-plugin-patterns",
-        "./skills/postgresql-schema-design",
-        "./skills/postgresql-migration-safety",
-        "./skills/astro-static-first"
-      ]
+      "name": "canon",
+      "source": "./plugins/code",
+      "description": "Strict latest-official-API conventions for Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Go Echo v5 + sqlc / Node Fastify v5 / PostgreSQL / Astro. Framework skills auto-activate by file path; deprecated patterns are forbidden, current best practices are forced. Plus two manual workflow commands: /canon:go (work discipline) and /canon:cm (structured, spec-compliant commits).",
+      "category": "development"
+    },
+    {
+      "name": "canon-chinese",
+      "source": "./plugins/chinese",
+      "description": "Forces plain, jargon-free Simplified Chinese and strips AI-tic phrasing. Ships as an output style that applies automatically once enabled.",
+      "category": "development"
     }
   ]
 }

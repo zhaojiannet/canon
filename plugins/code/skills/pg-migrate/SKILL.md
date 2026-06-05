@@ -1,5 +1,5 @@
 ---
-name: postgresql-migration-safety
+name: pg-migrate
 description: Enforce safe PostgreSQL migration practices. Use this skill when editing **/migrations/*.sql, **/migrate/*.sql, schema.sql, or when the user mentions migration, ALTER TABLE, DROP TABLE, ADD COLUMN, NOT NULL, RENAME COLUMN, CREATE INDEX, lock table, downtime, schema change, sqitch, golang-migrate, Flyway. Forbids destructive ops without explicit user approval, NOT NULL adds without default, blocking index creation on large tables, atomic renames, transaction-less migrations.
 paths:
   - "**/migrations/*.sql"
