@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lockstep-postgres",
+  "description": "Strict PostgreSQL schema design + migration safety. Auto-activates on migration/schema SQL; consistent table shape (snake_case, timestamptz, FK + index), zero-downtime migrations, destructive ops gated behind approval.",
+  "version": "0.6.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "postgresql",
+    "schema",
+    "migration",
+    "best-practices"
+  ]
+}

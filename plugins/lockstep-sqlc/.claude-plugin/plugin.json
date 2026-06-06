@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lockstep-sqlc",
+  "description": "Strict sqlc codegen conventions for Go + PostgreSQL. Auto-activates on sqlc.yaml and query SQL; SQL is the source of truth, calls go through the generated Querier, no hand-written database/sql.",
+  "version": "0.6.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "sqlc",
+    "go",
+    "postgresql",
+    "codegen",
+    "best-practices"
+  ]
+}

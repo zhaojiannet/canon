@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lockstep-tailwind",
+  "description": "Strict Tailwind CSS v4 utility-first conventions. Auto-activates on .vue/.astro/.html/.tsx/.jsx/.css; forbids <style> blocks and deprecated utilities, forces oklch() colors and v4 syntax.",
+  "version": "0.6.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "tailwind",
+    "css",
+    "utility-first",
+    "best-practices"
+  ]
+}
