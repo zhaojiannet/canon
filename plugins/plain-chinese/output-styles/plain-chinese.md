@@ -1,5 +1,5 @@
 ---
-name: 朴素中文
+name: plain-chinese
 description: 用平实中文表达，禁止互联网黑话与职场黑话，保留真正的专业术语
 keep-coding-instructions: true
 force-for-plugin: true
