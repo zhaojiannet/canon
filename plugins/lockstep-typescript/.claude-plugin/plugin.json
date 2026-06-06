@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lockstep-typescript",
+  "description": "Strict TypeScript 5+ type-checking. Auto-activates on .ts/.tsx and tsconfig.json; forbids any / @ts-ignore / namespace / non-const enum, forces strict tsconfig and unknown over any.",
+  "version": "0.6.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "strict",
+    "type-safety",
+    "best-practices"
+  ]
+}

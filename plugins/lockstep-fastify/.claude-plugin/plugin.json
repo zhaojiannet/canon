@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lockstep-fastify",
+  "description": "Strict Fastify v5 plugin/route conventions for Node/TypeScript. Auto-activates on Fastify files; encapsulated plugins, fp wrapper for cross-scope decorators, schema validation over manual.",
+  "version": "0.6.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "fastify",
+    "node",
+    "typescript",
+    "best-practices"
+  ]
+}

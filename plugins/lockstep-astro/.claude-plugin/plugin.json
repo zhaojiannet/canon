@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lockstep-astro",
+  "description": "Strict Astro 6+ static-first conventions. Auto-activates on .astro files; forbids over-eager hydration and full-page client:load, forces the lightest client directive and getCollection over Astro.glob.",
+  "version": "0.6.0",
+  "author": {
+    "name": "zhaoJian",
+    "email": "x@zhaojian.net"
+  },
+  "homepage": "https://github.com/zhaojiannet/canon",
+  "repository": "https://github.com/zhaojiannet/canon",
+  "license": "MIT",
+  "keywords": [
+    "astro",
+    "ssr",
+    "islands",
+    "best-practices"
+  ]
+}
