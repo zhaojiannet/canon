@@ -1,23 +1,77 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "canon",
-  "description": "Canon: enforce the canonical way. A code plugin that locks Claude onto the latest official framework APIs, and a Chinese plugin that forces plain, jargon-free writing.",
-  "version": "0.5.0",
+  "description": "Canon: enforce the canonical way. A lockstep-* series of framework-convention plugins (Astro, Vue, Nuxt UI, Tailwind, TypeScript, Echo, sqlc, Fastify, PostgreSQL) that lock Claude onto the latest official APIs, a flow plugin with manual work/commit commands, and plain-chinese for jargon-free Chinese output. Install only the framework plugins your project needs.",
+  "version": "0.6.0",
   "owner": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
   },
   "plugins": [
     {
-      "name": "canon",
-      "source": "./plugins/code",
-      "description": "Strict latest-official-API conventions for Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Go Echo v5 + sqlc / Node Fastify v5 / PostgreSQL / Astro. Framework skills auto-activate by file path; deprecated patterns are forbidden, current best practices are forced. Plus two manual workflow commands: /canon:go (work discipline) and /canon:cm (structured, spec-compliant commits).",
+      "name": "flow",
+      "source": "./plugins/flow",
+      "description": "Manual workflow commands: /flow:go (work discipline) and /flow:cm (batched, spec-compliant commits).",
       "category": "development"
     },
     {
-      "name": "canon-chinese",
-      "source": "./plugins/chinese",
-      "description": "Forces plain, jargon-free Simplified Chinese and strips AI-tic phrasing. Ships as an output style that applies automatically once enabled.",
+      "name": "lockstep-astro",
+      "source": "./plugins/lockstep-astro",
+      "description": "Astro 6+ static-first conventions; auto-activates on .astro files.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-vue",
+      "source": "./plugins/lockstep-vue",
+      "description": "Vue 3.5+ single-file component conventions (script setup, Composition API); auto-activates on .vue files.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-nuxt-ui",
+      "source": "./plugins/lockstep-nuxt-ui",
+      "description": "Nuxt UI v4 component-first conventions; auto-activates on .vue files.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-tailwind",
+      "source": "./plugins/lockstep-tailwind",
+      "description": "Tailwind CSS v4 utility-first conventions; auto-activates on .vue/.astro/.html/.tsx/.jsx/.css.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-typescript",
+      "source": "./plugins/lockstep-typescript",
+      "description": "TypeScript 5+ strict type-checking; auto-activates on .ts/.tsx and tsconfig.json.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-echo",
+      "source": "./plugins/lockstep-echo",
+      "description": "Echo v5 handler and error-handling conventions for Go; auto-activates on .go files.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-sqlc",
+      "source": "./plugins/lockstep-sqlc",
+      "description": "sqlc codegen conventions for Go + PostgreSQL; auto-activates on sqlc.yaml and query SQL.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-fastify",
+      "source": "./plugins/lockstep-fastify",
+      "description": "Fastify v5 plugin/route conventions for Node/TypeScript.",
+      "category": "development"
+    },
+    {
+      "name": "lockstep-postgres",
+      "source": "./plugins/lockstep-postgres",
+      "description": "PostgreSQL schema design + migration safety; auto-activates on migration/schema SQL.",
+      "category": "development"
+    },
+    {
+      "name": "plain-chinese",
+      "source": "./plugins/plain-chinese",
+      "description": "Output style forcing plain, jargon-free Simplified Chinese and stripping AI-tic phrasing.",
       "category": "development"
     }
   ]
