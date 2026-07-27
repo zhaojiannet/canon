@@ -1,6 +1,6 @@
 # canon
 
-> Claude Code に規範を守らせる。一つの marketplace に 11 個の plugin：`lockstep-*` シリーズがコードの書き方を管理し（各フレームワーク公式の最新パターンに固定）、`flow` がワークフローコマンドを提供し、`plain-chinese` が中国語の表現を管理します（平易な言葉、ネット隠語や AI 口調を禁止）。
+> Claude Code に規範を守らせる。一つの marketplace に 11 個の plugin：`lockstep-*` シリーズがコードの書き方を管理し（各フレームワーク公式の最新安定版のパターンに固定）、`flow` がワークフローコマンドを提供し、`plain-chinese` が中国語の表現を管理します（平易な言葉、ネット隠語や AI 口調を禁止）。
 
 **Languages**: [简体中文](README.md) · [繁體中文](README.zh-Hant.md) · [English](README.en.md) · **日本語**
 
@@ -60,11 +60,11 @@
 
 | Plugin | トリガー paths | 機能 | 自動呼び出し名 |
 |---|---|---|---|
-| `lockstep-astro` | `**/*.astro` | Astro 6+ 静的優先：デフォルト zero JS、`client:visible`/`client:idle` を `client:load` より優先、`server:defer` で全ページ SSR を代替、Content Collections で `Astro.glob` を代替 | `/lockstep-astro:astro` |
+| `lockstep-astro` | `**/*.astro` | Astro 7 静的優先：デフォルト zero JS、`client:visible`/`client:idle` を `client:load` より優先、`server:defer` で全ページ SSR を代替、Content Collections で `Astro.glob` を代替 | `/lockstep-astro:astro` |
 | `lockstep-vue` | `**/*.vue` | Vue 3.5+ SFC：`<script setup>` + 型ベース `defineProps`/`defineEmits` + `defineModel` + `useTemplateRef` を強制。Options API / mixins を禁止 | `/lockstep-vue:vue` |
 | `lockstep-nuxt-ui` | `**/*.vue` | Nuxt UI v4 コンポーネント（U 接頭辞）の使用を強制し、生の `<button>` / `<input>` / `<dialog>` の手書きを禁止 | `/lockstep-nuxt-ui:nuxt-ui` |
 | `lockstep-tailwind` | `.vue/.astro/.html/.tsx/.jsx/.css` | Tailwind v4 utility-first：`<style>` ブロック / 旧 utility を禁止。`oklch()` / 括弧構文 / v4 構文を強制 | `/lockstep-tailwind:tailwind` |
-| `lockstep-typescript` | `.ts/.tsx` | TypeScript 5+ strict：`any` / `@ts-ignore` / namespace / 非 const enum を禁止。strict tsconfig + `unknown` で any を代替することを強制 | `/lockstep-typescript:typescript` |
+| `lockstep-typescript` | `.ts/.tsx` | TypeScript 7 strict：strict は 7 のデフォルトで無効化しない。`unknown` + 絞り込みで `any` を代替、const オブジェクトで enum を代替、ES module で namespace を代替。7 で削除された `baseUrl` / `target es5` / `outFile` は書き換える | `/lockstep-typescript:typescript` |
 | `lockstep-echo` | `**/*.go` | Echo v5 エラー処理：`HTTPError` + 集中型 `HTTPErrorHandler`、`errors.Is`/`errors.As`、`%w` wrap、graceful shutdown | `/lockstep-echo:echo` |
 | `lockstep-sqlc` | `queries/*.sql, sqlc.yaml` | sqlc codegen：SQL を源とし、生成された `Querier` を通す。手書きの `database/sql` を禁止 | `/lockstep-sqlc:sqlc` |
 | `lockstep-fastify` | fastify を import する `.ts/.js/.mjs` | Fastify v5：カプセル化された plugin、`fastify-plugin` (fp) でスコープをまたぐ、JSON schema 検証で手書きを代替 | `/lockstep-fastify:fastify` |

@@ -1,6 +1,6 @@
 ---
 name: typescript
-description: Enforce TypeScript 5+ strict type-checking. Use when editing .ts/.tsx or tsconfig.json, or when the user mentions TypeScript, any, unknown, strict mode, type assertion, generics, enum, or @ts-ignore. Forbids any, as any, @ts-ignore, namespace, non-const enum; forces strict tsconfig and unknown over any.
+description: Enforce TypeScript 7 strict type-checking. Use when editing .ts/.tsx or tsconfig.json, or when the user mentions TypeScript, any, unknown, strict mode, type assertion, generics, enum, namespace, baseUrl, or @ts-ignore. Strict is on by default in 7 and stays on, reaches for unknown plus narrowing where any would go, const objects in place of enum, ES modules in place of namespace, and fixes the type rather than reaching for as any or @ts-ignore.
 paths:
   - "**/*.ts"
   - "**/*.tsx"
@@ -9,16 +9,28 @@ allowed-tools:
   - Grep
 ---
 
+> Targets TypeScript 7 · verified 2026-07 (latest 7.0.2, released 2026-07-08).
+
 This skill enforces TypeScript strict type-checking. The rule: trust the type system, no escape hatches.
 
-Apply only when the project uses `typescript ^5.0` or higher. If `package.json` pins an older major, **STOP** and ask the user.
+Apply only when the project uses `typescript ^7.0` or higher. If `package.json` pins 5.x or 6.x, **STOP** and ask the user — the upgrade path runs 5 → 6 → 7, and 7 turns everything 6 deprecated into a hard error.
 
-## tsconfig requirements
+## tsconfig
+
+TypeScript 7 ships these on by default. Do not write them out, and do not turn them off:
+
+`strict` (which brings `noImplicitAny` / `strictNullChecks` / `strictFunctionTypes` / `strictBindCallApply` / `strictPropertyInitialization` / `noImplicitThis` / `alwaysStrict` / `useUnknownInCatchVariables` / `strictBuiltinIteratorReturn`), `module` at `esnext`, `target` at the current stable ES version, `noUncheckedSideEffectImports`, and `stableTypeOrdering` (which cannot be disabled). `alwaysStrict` is forced true.
+
+Two defaults that catch people on upgrade:
+
+- **`rootDir` now defaults to `./`**, not an inferred common source directory. A project whose sources live in `src/` must set it explicitly, or `outDir` output lands in the wrong place.
+- **`types` now defaults to `[]`.** Every `@types` package used to be pulled in automatically. List what you need, or set `["*"]` to get the old behaviour back.
+
+Add these to harden past the defaults:
 
 ```json
 {
   "compilerOptions": {
-    "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
@@ -30,14 +42,26 @@ Apply only when the project uses `typescript ^5.0` or higher. If `package.json` 
 }
 ```
 
-`strict: true` enables `noImplicitAny` / `strictNullChecks` / `strictFunctionTypes` / `strictBindCallApply` / `strictPropertyInitialization` / `noImplicitThis` / `alwaysStrict` / `useUnknownInCatchVariables` / `strictBuiltinIteratorReturn`. Add `noUncheckedIndexedAccess` / `exactOptionalPropertyTypes` / `noImplicitOverride` / `noPropertyAccessFromIndexSignature` to harden further.
+## Removed in 7 — hard errors, not warnings
+
+| Gone | Use instead |
+|---|---|
+| `target` at `es5`, plus `downlevelIteration` | ES2015 is the floor now; drop both lines |
+| `baseUrl` | `paths`, resolved relative to the project root |
+| `moduleResolution` at `node` / `node10` / `classic` | `nodenext` or `bundler` |
+| `module` at `amd` / `umd` / `systemjs` / `none` | `esnext`, which is the default |
+| `outFile` | a bundler |
+| `esModuleInterop` or `allowSyntheticDefaultImports` set to false | cannot be disabled — delete the line |
+| `module Foo { }` spelling of a namespace | ES modules. Ambient `declare module "pkg"` is still fully supported |
+| `import x from "y" assert { ... }` | `with { ... }` |
+| JSDoc `@enum` | `@typedef` on `(typeof YourEnum)[keyof typeof YourEnum]` |
 
 ## Forbidden patterns
 
 - `any` type (explicit or via inference). Use `unknown` and narrow with type guards.
 - `as any` / `as unknown as Foo` chained casts. Either fix the upstream type or write a proper type guard.
 - `// @ts-ignore`. Use `// @ts-expect-error <reason>` so the suppression breaks if the underlying issue is fixed.
-- `namespace Foo { ... }`. Use ES module imports/exports.
+- `namespace Foo { ... }`. Use ES module imports/exports. The `module Foo { }` spelling is a hard error in 7.
 - `enum Color { ... }`. Use `const Color = { Red: 'red', Blue: 'blue' } as const; type Color = typeof Color[keyof typeof Color]`.
 - `function foo(x): void` (implicit any param). Annotate or rely on inference.
 - `Function` type. Use specific `(...args: T[]) => R`.
@@ -118,6 +142,9 @@ grep -rnE '@ts-ignore' --include='*.ts' --include='*.tsx' .
 grep -rnE '\bnamespace\s+\w+\s*\{' --include='*.ts' --include='*.tsx' .
 grep -rnE '^\s*enum\s+\w+\s*\{' --include='*.ts' --include='*.tsx' .  # non-const enum
 grep -rnE 'catch\s*\(\s*\w+\s*\)\s*\{[^}]*\.message' --include='*.ts' --include='*.tsx' .
+grep -rnE '"(baseUrl|outFile|downlevelIteration)"' --include='tsconfig*.json' .   # removed in 7
+grep -rnE '"(target|moduleResolution)"\s*:\s*"(es5|node|node10|classic)"' --include='tsconfig*.json' .
+grep -rnE 'assert\s*\{' --include='*.ts' --include='*.tsx' .                       # import assertions -> with
 ```
 
 Full tsconfig reference: https://www.typescriptlang.org/tsconfig
