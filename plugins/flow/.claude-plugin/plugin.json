@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "flow",
   "description": "Two manual workflow commands for Claude Code: /flow:go (work discipline — verify before acting, fix root causes, consider security, never report false progress) and /flow:cm (batched, spec-compliant commits). Manual-only; they do not auto-activate.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
