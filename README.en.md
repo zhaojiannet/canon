@@ -1,6 +1,6 @@
 # canon
 
-> Keep Claude Code on the rails. One marketplace, 11 plugins: the `lockstep-*` series enforces how code is written (locked onto each framework's latest official practices), `flow` provides workflow commands, and `plain-chinese` governs Chinese writing (plain language, no internet or AI jargon).
+> Keep Claude Code on the rails. One marketplace, 11 plugins: the `lockstep-*` series enforces how code is written (locked onto each framework's latest stable release), `flow` provides workflow commands, and `plain-chinese` governs Chinese writing (plain language, no internet or AI jargon).
 
 **Languages**: [简体中文](README.md) · [繁體中文](README.zh-Hant.md) · **English** · [日本語](README.ja.md)
 
@@ -12,7 +12,7 @@ A Claude Code plugin marketplace named `canon` (from *canonical* — "do it the 
 
 | Plugin | Governs | How it applies |
 |---|---|---|
-| **`lockstep-*`** (9 framework plugins) | Code conventions: one plugin per framework, enforcing the latest official stable-version practices for Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL, and forbidding deprecated patterns | Auto-activates by `paths` when you edit matching files |
+| **`lockstep-*`** (9 framework plugins) | Code conventions: one plugin per framework, enforcing the latest stable official practices for Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL, and forbidding deprecated patterns | Auto-activates by `paths` when you edit matching files |
 | **`flow`** | Two manual workflow commands, `go` and `cm` | Invoke manually: `/flow:go`, `/flow:cm` |
 | **`plain-chinese`** | Chinese writing: forces plain Simplified Chinese, bans internet/workplace buzzwords and AI-tic phrasing, keeps real technical terms | An output style, always on once enabled |
 
@@ -60,11 +60,11 @@ Verify: type `/plugin`, open the **Installed** tab, and you'll see the `lockstep
 
 | Plugin | Trigger paths | What it enforces | Auto call name |
 |---|---|---|---|
-| `lockstep-astro` | `**/*.astro` | Astro 6+ static-first: zero JS by default, `client:visible`/`client:idle` over `client:load`, `server:defer` over full-page SSR, Content Collections over `Astro.glob` | `/lockstep-astro:astro` |
+| `lockstep-astro` | `**/*.astro` | Astro 7 static-first: zero JS by default, `client:visible`/`client:idle` over `client:load`, `server:defer` over full-page SSR, Content Collections over `Astro.glob` | `/lockstep-astro:astro` |
 | `lockstep-vue` | `**/*.vue` | Vue 3.5+ SFC: `<script setup>` + typed `defineProps`/`defineEmits` + `defineModel` + `useTemplateRef`; no Options API / mixins | `/lockstep-vue:vue` |
 | `lockstep-nuxt-ui` | `**/*.vue` | Use Nuxt UI v4 components (U-prefix) instead of raw `<button>` / `<input>` / `<dialog>` | `/lockstep-nuxt-ui:nuxt-ui` |
 | `lockstep-tailwind` | `.vue/.astro/.html/.tsx/.jsx/.css` | Tailwind v4 utility-first: no `<style>` blocks / deprecated utilities; force `oklch()` / paren syntax / v4 syntax | `/lockstep-tailwind:tailwind` |
-| `lockstep-typescript` | `.ts/.tsx` | TypeScript 5+ strict: no `any` / `@ts-ignore` / namespace / non-const enum; force strict tsconfig + `unknown` over any | `/lockstep-typescript:typescript` |
+| `lockstep-typescript` | `.ts/.tsx` | TypeScript 7 strict: strict is the default in 7 and stays on; `unknown` plus narrowing over `any`, const objects over enum, ES modules over namespace; rewrite the flags 7 removed (`baseUrl` / `target es5` / `outFile`) | `/lockstep-typescript:typescript` |
 | `lockstep-echo` | `**/*.go` | Echo v5 error handling: `HTTPError` + central `HTTPErrorHandler`, `errors.Is`/`errors.As`, `%w` wrap, graceful shutdown | `/lockstep-echo:echo` |
 | `lockstep-sqlc` | `queries/*.sql, sqlc.yaml` | sqlc codegen: SQL is the source of truth, calls go through the generated `Querier`, no hand-written `database/sql` | `/lockstep-sqlc:sqlc` |
 | `lockstep-fastify` | `.ts/.js/.mjs` importing fastify | Fastify v5: encapsulated plugins, `fastify-plugin` (fp) for cross-scope, JSON schema validation over manual | `/lockstep-fastify:fastify` |

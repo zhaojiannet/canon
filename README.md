@@ -1,6 +1,6 @@
 # canon
 
-> 让 Claude Code 守规范。一个 marketplace 下 11 个插件：`lockstep-*` 系列管代码写法（强制跟框架官方最新做法走），`flow` 管工作流命令，`plain-chinese` 管中文表达（平实大白话、严禁互联网黑话和 AI 腔）。
+> 让 Claude Code 守规范。一个 marketplace 下 11 个插件：`lockstep-*` 系列管代码写法（锁定各框架官方最新稳定版的做法），`flow` 管工作流命令，`plain-chinese` 管中文表达（平实大白话、严禁互联网黑话和 AI 腔）。
 
 **Languages**: **简体中文** · [繁體中文](README.zh-Hant.md) · [English](README.en.md) · [日本語](README.ja.md)
 
@@ -60,11 +60,11 @@
 
 | 插件 | 触发 paths | 功能 | 自动调用名 |
 |---|---|---|---|
-| `lockstep-astro` | `**/*.astro` | Astro 6+ 静态优先：默认 zero JS、`client:visible`/`client:idle` 优于 `client:load`、`server:defer` 替代全页 SSR、Content Collections 替代 `Astro.glob` | `/lockstep-astro:astro` |
+| `lockstep-astro` | `**/*.astro` | Astro 7 静态优先：默认 zero JS、`client:visible`/`client:idle` 优于 `client:load`、`server:defer` 替代全页 SSR、Content Collections 替代 `Astro.glob` | `/lockstep-astro:astro` |
 | `lockstep-vue` | `**/*.vue` | Vue 3.5+ SFC：强制 `<script setup>` + 类型化 `defineProps`/`defineEmits` + `defineModel` + `useTemplateRef`；禁 Options API / mixins | `/lockstep-vue:vue` |
 | `lockstep-nuxt-ui` | `**/*.vue` | 强制用 Nuxt UI v4 组件（U 前缀）而非手写 raw `<button>` / `<input>` / `<dialog>` | `/lockstep-nuxt-ui:nuxt-ui` |
 | `lockstep-tailwind` | `.vue/.astro/.html/.tsx/.jsx/.css` | Tailwind v4 utility-first：禁 `<style>` 块 / 旧 utility；强制 `oklch()` / 圆括号语法 / v4 语法 | `/lockstep-tailwind:tailwind` |
-| `lockstep-typescript` | `.ts/.tsx` | TypeScript 5+ strict：禁 `any` / `@ts-ignore` / namespace / 非 const enum；强制 strict tsconfig + `unknown` 替代 any | `/lockstep-typescript:typescript` |
+| `lockstep-typescript` | `.ts/.tsx` | TypeScript 7 strict：strict 在 7 里是默认值、不许关；`unknown` + 收窄替代 `any`，const 对象替代 enum，ES module 替代 namespace；7 移除的 `baseUrl` / `target es5` / `outFile` 一律改写 | `/lockstep-typescript:typescript` |
 | `lockstep-echo` | `**/*.go` | Echo v5 错误处理：`HTTPError` + 集中 `HTTPErrorHandler`、`errors.Is`/`errors.As`、`%w` wrap、graceful shutdown | `/lockstep-echo:echo` |
 | `lockstep-sqlc` | `queries/*.sql, sqlc.yaml` | sqlc codegen：SQL 为源、走生成的 `Querier`、禁手写 `database/sql` | `/lockstep-sqlc:sqlc` |
 | `lockstep-fastify` | 含 fastify import 的 `.ts/.js/.mjs` | Fastify v5：封装式 plugin、`fastify-plugin` (fp) 跨作用域、JSON schema 验证替代手写 | `/lockstep-fastify:fastify` |

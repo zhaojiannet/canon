@@ -1,6 +1,6 @@
 ---
 name: astro
-description: Enforce Astro 6+ static-first conventions. Use when editing .astro files or when the user mentions Astro, islands, hydration, client directives, server:defer, content collections, or getCollection. Forbids over-eager hydration and full-page client:load when a lighter directive works.
+description: Enforce Astro 7 static-first conventions. Use when editing .astro files or when the user mentions Astro, islands, hydration, client directives, server:defer, content collections, or getCollection. Ships zero JS by default and picks the lightest client directive that works — client:visible or client:idle ahead of client:load, getCollection ahead of Astro.glob.
 paths:
   - "**/*.astro"
 allowed-tools:
@@ -8,9 +8,26 @@ allowed-tools:
   - Grep
 ---
 
-This skill enforces Astro 6+ static-first conventions. The rule: render to static HTML by default, ship JavaScript only where there is real interactivity, and pick the lightest hydration directive that works.
+> Targets Astro 7 · verified 2026-07 (latest 7.1.3).
 
-Apply only when the project uses `astro ^6.0` or higher. If `package.json` pins an older major, **STOP** and ask before applying.
+This skill enforces Astro static-first conventions. The rule: render to static HTML by default, ship JavaScript only where there is real interactivity, and pick the lightest hydration directive that works.
+
+Apply only when the project uses `astro ^7.0` or higher. If `package.json` pins an older major, **STOP** and ask before applying.
+
+## What changed in 7 (and 6)
+
+Client directives, content collections and server islands are unchanged — the rules below carry over. What did change:
+
+| Version | Change | What it means |
+|---|---|---|
+| 7 | Rust compiler replaces the Go one | Every non-void element needs a closing tag. Invalid markup is no longer auto-corrected — it errors |
+| 7 | `compressHTML` defaults to `'jsx'`, not `true` | Whitespace between inline elements is stripped by JSX rules. Check spacing-sensitive layouts after upgrading |
+| 7 | Markdown runs on Sätteri instead of remark/rehype | Drop `@astrojs/markdown-remark`, or install it explicitly if you depend on specific plugins |
+| 7 | `src/fetch.ts` is a reserved filename | Rename it, or point `fetchFile` elsewhere |
+| 7 | Vite 8 | Re-check Vite plugins and config |
+| 6 | Node 18 and 20 dropped | Requires Node 22.12+ |
+| 6 | The v2-era Content Collections API is gone | Content Layer `loader` API only; config must live at `src/content.config.ts` |
+| 6 | `import.meta.env` values are always inlined | Automatic type coercion is gone — parse strings yourself |
 
 ## Core principles
 
