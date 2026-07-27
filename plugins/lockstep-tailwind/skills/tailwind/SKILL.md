@@ -1,6 +1,6 @@
 ---
 name: tailwind
-description: Enforce Tailwind CSS v4 utility-first conventions. Use when editing .vue/.astro/.html/.tsx/.jsx/.css or when the user mentions Tailwind, utility class, styling a UI element, layout, spacing, or dark mode, or wants to replace raw/scoped CSS. Forbids <style> blocks and deprecated v4 utilities; forces oklch() colors and v4 syntax. Do NOT use without Tailwind v4, on backend code, or for non-styling refactors.
+description: Enforce Tailwind CSS v4 utility-first conventions. Use when editing .vue/.astro/.html/.tsx/.jsx/.css or when the user mentions Tailwind, utility class, styling a UI element, layout, spacing, or dark mode, or wants to replace raw/scoped CSS. Expresses styling as utility classes in the template, with v4 syntax and oklch() colors; raw CSS stays for what utilities genuinely cannot reach. Do NOT use without Tailwind v4, on backend code, or for non-styling refactors.
 paths:
   - "**/*.vue"
   - "**/*.astro"
@@ -13,6 +13,8 @@ allowed-tools:
   - Read
   - Grep
 ---
+
+> Targets Tailwind CSS v4 · verified 2026-07 (latest 4.3.3). v3 syntax still outnumbers v4 in training data, which is what this skill exists to counteract.
 
 This skill enforces Tailwind CSS v4 conventions. The rule is utility-first: express styling through class composition, not raw CSS files.
 

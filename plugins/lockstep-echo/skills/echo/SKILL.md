@@ -1,12 +1,14 @@
 ---
 name: echo
-description: Enforce Echo v5 handler conventions for Go, focused on error handling. Use when editing .go handler/route/middleware files or when the user mentions Echo, HandlerFunc, c.Bind, middleware, HTTPError, HTTPErrorHandler, error wrap, or graceful shutdown. Forbids manual JSON error responses, err.Error() string comparison, swallowed errors, and e.Start without graceful shutdown.
+description: Enforce Echo v5 handler conventions for Go, focused on error handling. Use when editing .go handler/route/middleware files or when the user mentions Echo, HandlerFunc, c.Bind, middleware, HTTPError, HTTPErrorHandler, error wrap, or graceful shutdown. Routes every failure through HTTPError and one central HTTPErrorHandler, matches errors with errors.Is/As, wraps and returns them, and starts the server with graceful shutdown.
 paths:
   - "**/*.go"
 allowed-tools:
   - Read
   - Grep
 ---
+
+> Targets Echo v5 · verified 2026-07 (latest v5.3.1, released 2026-07-21).
 
 This skill enforces Echo v5 conventions for Go HTTP services. Apply only when the project imports `github.com/labstack/echo/v5` (v5.0+). If the project still imports `echo/v4` or earlier, **STOP** and ask the user—v5 import path is `v5/`.
 

@@ -1,6 +1,6 @@
 ---
 name: fastify
-description: Enforce Fastify v5 plugin/route conventions for Node/TypeScript. Use when editing .ts/.js/.mjs that import fastify or @fastify/*, or when the user mentions Fastify, plugin, route, schema validation, encapsulation, fastify-plugin/fp, or lifecycle hooks. Forbids manual JSON validation when schema works, missing fp wrapper for cross-scope decorators, and app-root hooks that should be plugin-scoped.
+description: Enforce Fastify v5 plugin/route conventions for Node/TypeScript. Use when editing .ts/.js/.mjs that import fastify or @fastify/*, or when the user mentions Fastify, plugin, route, schema validation, encapsulation, fastify-plugin/fp, or lifecycle hooks. Declares route schemas in place of manual validation, wraps cross-scope decorators in fastify-plugin/fp, and scopes lifecycle hooks to the plugin that owns them.
 paths:
   - "**/*.ts"
   - "**/*.tsx"
@@ -10,6 +10,8 @@ allowed-tools:
   - Read
   - Grep
 ---
+
+> Targets Fastify v5 · verified 2026-07 (latest 5.10.0).
 
 This skill enforces Fastify v5 plugin/route conventions for Node and TypeScript projects. The rule: every plugin is encapsulated by default; expose to parent scope only when needed; routes declare schemas, not manual validation.
 

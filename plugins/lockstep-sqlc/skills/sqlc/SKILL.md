@@ -1,6 +1,6 @@
 ---
 name: sqlc
-description: Enforce sqlc codegen conventions for Go + PostgreSQL. Use when editing sqlc.yaml, **/queries/*.sql, or generated *.sql.go, or when the user mentions sqlc, codegen, Querier interface, db.Queries, sqlc generate, or sqlc vet. Forbids hand-written database/sql calls when sqlc is configured, v1 config, and manual edits to generated files.
+description: Enforce sqlc codegen conventions for Go + PostgreSQL. Use when editing sqlc.yaml, **/queries/*.sql, or generated *.sql.go, or when the user mentions sqlc, codegen, Querier interface, db.Queries, sqlc generate, or sqlc vet. Keeps SQL as the source of truth, routes every call through the generated Querier, uses v2 config, and regenerates rather than hand-editing generated files.
 paths:
   - "**/sqlc.yaml"
   - "**/sqlc.yml"
@@ -10,6 +10,8 @@ allowed-tools:
   - Read
   - Grep
 ---
+
+> Targets sqlc 1.31+ · verified 2026-07 (latest v1.31.1, released 2026-04-22).
 
 This skill enforces sqlc 1.31+ conventions for Go projects with PostgreSQL. The rule: SQL is the source of truth, Go calls go through the generated `Querier` interface only.
 

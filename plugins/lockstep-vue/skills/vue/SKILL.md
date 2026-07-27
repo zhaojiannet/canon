@@ -1,12 +1,14 @@
 ---
 name: vue
-description: Enforce Vue 3.5+ single-file component conventions with <script setup>, Composition API only, type-safe defineProps/defineEmits, defineModel, useTemplateRef. Use when editing .vue files or when the user mentions Vue component, props, emits, v-model, composable, or script setup. Forbids Options API, mixins, untyped props, manual ref strings.
+description: Enforce Vue 3.5+ single-file component conventions with <script setup>, Composition API only, type-safe defineProps/defineEmits, defineModel, useTemplateRef. Use when editing .vue files or when the user mentions Vue component, props, emits, v-model, composable, or script setup. Rewrites Options API and mixins into their Composition API equivalents, and types every prop and emit.
 paths:
   - "**/*.vue"
 allowed-tools:
   - Read
   - Grep
 ---
+
+> Targets Vue 3.5+ · verified 2026-07 (latest 3.5.40).
 
 This skill enforces Vue 3.5+ single-file component conventions. Composition API + `<script setup>` only; type-safe declarations; modern macros (`defineModel` / `useTemplateRef` / `useId`).
 
