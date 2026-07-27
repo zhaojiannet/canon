@@ -1,12 +1,14 @@
 ---
 name: nuxt-ui
-description: Enforce Nuxt UI v4 component-first conventions. Use when editing .vue files or when the user mentions Nuxt UI, a U-prefix component (UButton, UModal, UForm, UTable…), or building any UI element. Forbids hand-written raw <button>/<input>/<dialog>/<table> when Nuxt UI provides an equivalent; forces U-prefix components.
+description: Enforce Nuxt UI v4 component-first conventions. Use when editing .vue files or when the user mentions Nuxt UI, a U-prefix component (UButton, UModal, UForm, UTable…), or building any UI element. Reaches for the U-prefix component wherever Nuxt UI ships one, in place of hand-written button, input, dialog or table markup.
 paths:
   - "**/*.vue"
 allowed-tools:
   - Read
   - Grep
 ---
+
+> Targets Nuxt UI v4 · verified 2026-07 (latest 4.10.0).
 
 This skill enforces Nuxt UI v4 component-first conventions. The rule: when Nuxt UI provides a component, use it instead of hand-writing raw HTML.
 

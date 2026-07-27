@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lockstep-vue",
   "description": "Strict Vue 3.5+ single-file component conventions. Auto-activates on .vue files; <script setup> + Composition API only, type-safe defineProps/defineEmits/defineModel, no Options API or mixins.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
