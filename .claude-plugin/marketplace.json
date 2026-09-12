@@ -11,7 +11,7 @@
     {
       "name": "flow",
       "source": "./plugins/flow",
-      "description": "Manual workflow commands: /flow:go (work discipline) and /flow:cm (batched, spec-compliant commits).",
+      "description": "Manual workflow commands: /flow:go (work discipline), /flow:cm (batched, spec-compliant commits) and /flow:e2e (profile, plan, review, generate, run, heal, report end-to-end tests).",
       "category": "development"
     },
     {
