@@ -13,7 +13,7 @@
 | 插件 | 管什麼 | 怎麼生效 |
 |---|---|---|
 | **`lockstep-*`**（9 個框架插件） | 程式碼寫法：一框架一插件，強制 Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL 用各自官方最新穩定版的推薦做法，禁用已廢棄寫法 | 編輯對應檔案時按 `paths` 自動啟用 |
-| **`flow`** | 兩個手動工作流命令 `go`/`cm` | 手動呼叫 `/flow:go`、`/flow:cm` |
+| **`flow`** | 三個手動工作流命令 `go`/`cm`/`e2e` | 手動呼叫 `/flow:go`、`/flow:cm`、`/flow:e2e` |
 | **`plain-chinese`** | 中文表達：強制平實中文，禁網路黑話、職場黑話和 AI 腔，保留真正的專業術語 | 一個 output-style，啟用後一直生效 |
 
 **為什麼框架拆成 9 個插件、而不是打包成一個**：插件是最小安裝單元，裝一個就把它的 skill 全帶來、裝的人挑不了。拆開後才能按專案技術棧單獨裝——寫 Astro 站的專案只裝 `lockstep-astro`，用不到的後端框架一個 token 不佔（每個 skill 的描述會佔 Claude 的 skill 清單預算）。
@@ -77,7 +77,7 @@
 
 ### 工作流命令：flow（手動觸發）
 
-`flow` 插件含兩個手動觸發的工作流命令，設了 `disable-model-invocation: true`：只在你輸入 `/` 時手動呼叫，Claude 不會自動觸發，description 也不進 context、只當 `/` 選單裡的標籤。
+`flow` 插件含三個手動觸發的工作流命令，設了 `disable-model-invocation: true`：只在你輸入 `/` 時手動呼叫，Claude 不會自動觸發，description 也不進 context、只當 `/` 選單裡的標籤。
 
 ```bash
 /plugin install flow@canon
@@ -88,8 +88,9 @@
 |---|---|---|
 | `go` | 一套貫穿任務的工作紀律：開始幹活先查官方最新文件再動手、選最佳方案不選臨時做法；涉及安全時主動防護、不留已知漏洞；遇到問題不糊弄、不繞過；做錯時誠實承認；有遺留時如實交代、不謊報完成 | `/flow:go` |
 | `cm` | 把當前改動分批分類提交：優先按上下文裡的任務清單分組、一個 commit 只做一件事，commit message 按規範寫，提交前列給你確認，未經同意不 push | `/flow:cm` |
+| `e2e` | 給當前專案做端到端測試：先讀專案出畫像（入口、帳號、副作用分級、資料恢復、業務口徑）→ 出計畫等你審 → 按官方 `playwright-cli` skill 生成 Playwright spec → 每頁橫切面冒煙 → 容器內跑、失敗先定性再修（應用 bug 只報不改）→ 出報告。狀態存 `.scratch/e2e/`，跨會話可續；宿主機不裝任何 Playwright 元件 | `/flow:e2e` |
 
-> 這兩個是作者的個人工作流命令。`go` 是通用紀律，誰裝都能用；`cm` 的 commit message 格式引用作者全域 `~/.claude/CLAUDE.md` 裡的規範，你可以換成自己的提交規範。
+> 這三個是作者的個人工作流命令。`go` 是通用紀律，誰裝都能用；`cm` 的 commit message 格式引用作者全域 `~/.claude/CLAUDE.md` 裡的規範，你可以換成自己的提交規範；`e2e` 依賴官方 `playwright-cli` skill（`~/.claude/skills/playwright-cli/`，用 `playwright-cli install --skills -g` 安裝）和 OrbStack 容器網域，執行環境搭法見 `plugins/flow/skills/e2e/references/runner.md`。
 
 ---
 
