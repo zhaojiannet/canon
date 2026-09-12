@@ -88,9 +88,9 @@
 |---|---|---|
 | `go` | 一套貫穿任務的工作紀律：開始幹活先查官方最新文件再動手、選最佳方案不選臨時做法；涉及安全時主動防護、不留已知漏洞；遇到問題不糊弄、不繞過；做錯時誠實承認；有遺留時如實交代、不謊報完成 | `/flow:go` |
 | `cm` | 把當前改動分批分類提交：優先按上下文裡的任務清單分組、一個 commit 只做一件事，commit message 按規範寫，提交前列給你確認，未經同意不 push | `/flow:cm` |
-| `e2e` | 給當前專案做端到端測試：先讀專案出畫像（入口、帳號、副作用分級、資料恢復、業務口徑）→ 出計畫等你審 → 按官方 `playwright-cli` skill 生成 Playwright spec → 每頁橫切面冒煙 → 容器內跑、失敗先定性再修（應用 bug 只報不改）→ 出報告。狀態存 `.scratch/e2e/`，跨會話可續；宿主機不裝任何 Playwright 元件 | `/flow:e2e` |
+| `e2e` | 用現有帳號和環境給當前專案做全量端到端測試：先讀專案出畫像（入口、帳號、副作用分級、備份恢復、業務口徑）→ 出計畫等你審 → 按官方 `playwright-cli` skill 生成 Playwright spec → 每頁橫切面冒煙 → 獨立容器裡跑、失敗先定性再修（應用 bug 只報不改）→ 出報告。計畫裡每條場景帶狀態，跨會話續做，收尾「待做」必須為 0。被測專案只多一個 `e2e/` 目錄和一行 `.gitignore`，宿主機不裝任何 Playwright 元件 | `/flow:e2e` |
 
-> 這三個是作者的個人工作流命令。`go` 是通用紀律，誰裝都能用；`cm` 的 commit message 格式引用作者全域 `~/.claude/CLAUDE.md` 裡的規範，你可以換成自己的提交規範；`e2e` 依賴官方 `playwright-cli` skill（`~/.claude/skills/playwright-cli/`，用 `playwright-cli install --skills -g` 安裝）和 OrbStack 容器網域，執行環境搭法見 `plugins/flow/skills/e2e/references/runner.md`。
+> 這三個是作者的個人工作流命令。`go` 是通用紀律，誰裝都能用；`cm` 的 commit message 格式引用作者全域 `~/.claude/CLAUDE.md` 裡的規範，你可以換成自己的提交規範；`e2e` 用官方 `playwright-cli` skill 做規劃 / 生成 / 修復（由容器裝進專案的 `e2e/` 內），執行環境搭法見 `plugins/flow/skills/e2e/references/runner.md`。
 
 ---
 
