@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 1 | 页面可达 | `resp.status() < 400` | 匿名页 / 已登录页各按其角色 |
 | 2 | 无脚本崩溃 | `page.on('pageerror')` 收到的列表为空 | SSR 已绘但未水合时点击会静默失效，这条抓得到 |
-| 3 | 应用壳渲染 | Nuxt `#__nuxt` 可见 / Astro `main` 可见 | 防止 200 但白屏 |
+| 3 | 应用壳渲染 | Nuxt `#__nuxt` 非空（`not.toBeEmpty()`）/ Astro `main` 非空 | 防止 200 但白屏。不用 `toBeVisible()`：布局用固定定位时壳子高度为 0，会误判 hidden |
 | 4 | 无 i18n 缺 key | 正文不含 `t('`、`[missing`、形如 `xxx.yyy.zzz` 的裸 key | 按项目 i18n 库的缺 key 表现写正则 |
 | 5 | 权限边界 | 错角色访问受限页 → 403 页 / 重定向到登录或首页 | 每个受限前缀至少一个反例 |
 | 6 | 控制台无 error 级 | `console` 消息中 `type() === 'error'` 为空 | 第三方脚本被 CSP 拦的噪音要在画像里列白名单 |
@@ -18,7 +18,7 @@
 ## 写法
 
 ```ts
-// tests/e2e/smoke.spec.ts
+// e2e/tests/smoke.spec.ts
 import { test, expect } from '@playwright/test'
 
 const PAGES: Array<{ path: string; role: 'anon' | 'shop-admin'; expectBlocked?: boolean }> = [
@@ -46,7 +46,7 @@ for (const p of PAGES) {
         return
       }
 
-      await expect(page.locator('#__nuxt')).toBeVisible()
+      await expect(page.locator('#__nuxt')).not.toBeEmpty()
       await expect(page.locator('body')).not.toContainText(/\bt\('|\[missing|\b[a-z]+\.[a-z]+\.[a-z]+\b/)
       expect(pageErrors, 'uncaught page errors').toEqual([])
       expect(consoleErrors.filter(t => !IGNORE.some(re => re.test(t))), 'console errors').toEqual([])
