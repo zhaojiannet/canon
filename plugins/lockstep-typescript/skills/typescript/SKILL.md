@@ -49,7 +49,7 @@ Add these to harden past the defaults:
 | `target` at `es5`, plus `downlevelIteration` | ES2015 is the floor now; drop both lines |
 | `baseUrl` | `paths`, resolved relative to the project root |
 | `moduleResolution` at `node` / `node10` / `classic` | `nodenext` or `bundler` |
-| `module` at `amd` / `umd` / `systemjs` / `none` | `esnext`, which is the default |
+| `module` at `amd` / `umd` / `system` / `none` (TypeScript 6.0 notes call the third one SystemJS) | `esnext`, which is the default |
 | `outFile` | a bundler |
 | `esModuleInterop` or `allowSyntheticDefaultImports` set to false | cannot be disabled — delete the line |
 | `module Foo { }` spelling of a namespace | ES modules. Ambient `declare module "pkg"` is still fully supported |
@@ -144,7 +144,7 @@ grep -rnE '^\s*(export\s+)?(declare\s+)?enum\s+\w+' --include='*.ts' --include='
 grep -rniE '"(baseUrl|outFile|downlevelIteration)"\s*:' --include='tsconfig*.json' .   # removed in 7
 grep -rniE '"target"\s*:\s*"es5"' --include='tsconfig*.json' .
 grep -rniE '"moduleResolution"\s*:\s*"(node|node10|classic)"' --include='tsconfig*.json' .
-grep -rniE '"module"\s*:\s*"(amd|umd|system|systemjs|none)"' --include='tsconfig*.json' .
+grep -rniE '"module"\s*:\s*"(amd|umd|system|none)"' --include='tsconfig*.json' .
 grep -rniE '"(esModuleInterop|allowSyntheticDefaultImports|alwaysStrict)"\s*:\s*false' --include='tsconfig*.json' .
 grep -rnE 'assert\s*\{' --include='*.ts' --include='*.tsx' .                       # import assertions -> with
 ```
