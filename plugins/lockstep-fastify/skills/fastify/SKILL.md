@@ -11,7 +11,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets Fastify v5 · verified 2026-07 (latest 5.10.0).
+> Targets Fastify v5 · verified 2026-09 (latest 5.12.4; v6 is still in alpha).
 
 This skill enforces Fastify v5 plugin/route conventions for Node and TypeScript projects. The rule: every plugin is encapsulated by default; expose to parent scope only when needed; routes declare schemas, not manual validation.
 
@@ -21,15 +21,19 @@ Apply only when the file imports `fastify` or `@fastify/*`. If the project uses 
 
 ```ts
 import type { FastifyPluginAsync } from 'fastify'
+import type { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts'
 
 export const userRoutes: FastifyPluginAsync = async (fastify, opts) => {
-  fastify.get('/users/:id', { schema: getUserSchema }, async (req, reply) => {
-    return { id: req.params.id }
+  const app = fastify.withTypeProvider<JsonSchemaToTsProvider>()
+  app.get('/users/:id', { schema: getUserSchema }, async (req, reply) => {
+    return { id: req.params.id }   // typed from getUserSchema (declared `as const`)
   })
 }
 ```
 
 Use `async (fastify, opts) =>` over `(fastify, opts, done) =>`. Async return is the completion signal.
+
+Type provider types do not propagate across plugin scopes: call `withTypeProvider<...>()` again inside each plugin, or type the plugin with the provider's plugin type (e.g. `FastifyPluginAsyncJsonSchemaToTs`, `FastifyPluginAsyncTypebox`, `FastifyPluginAsyncZod`). Without a provider (or explicit route generics), `req.params` / `req.body` / `req.query` are `unknown` in TypeScript.
 
 ## fastify-plugin (fp) — when to wrap
 
@@ -78,7 +82,9 @@ const createUserSchema = {
   }
 } as const
 
-fastify.post('/users', { schema: createUserSchema }, async (req, reply) => {
+const app = fastify.withTypeProvider<JsonSchemaToTsProvider>()
+
+app.post('/users', { schema: createUserSchema }, async (req, reply) => {
   reply.code(201)
   return { id: '...', email: req.body.email }
 })
@@ -90,12 +96,14 @@ fastify.post('/users', { schema: createUserSchema }, async (req, reply) => {
 - Manual validation in handler when JSON schema works.
 - `fastify.addHook('onRequest', ...)` at app root for cross-cutting auth. Move to a plugin or use route-level `preHandler`.
 - `fastify.decorate(...)` without `fp` wrapper, then trying to use the decoration in a sibling plugin. Encapsulation will isolate it.
+- `decorateRequest` / `decorateReply` with a reference type (`{}`, `[]`) as the initial value. Fastify v5 rejects it because the object would be shared across requests. Decorate with `null` (or omit the value) and assign per request in an `onRequest` hook, or pass a function or `{ getter() { ... } }`.
+- In TypeScript, decorating without declaration merging. Add `declare module 'fastify' { interface FastifyInstance { db: Db } }` (or `FastifyRequest` / `FastifyReply`) next to the `decorate*` call so the property is typed.
 - `app.use(...)` Express-style middleware. Native Fastify hooks/plugins preferred.
-- `req.body as any` or skipping schema. Use TypeScript with `JSONSchema`-derived types or `@sinclair/typebox` / `zod` + `fastify-type-provider-zod`.
-- Returning a status code via `return reply.code(400).send({ ... })` from an async handler. Either `reply.code(400)` then `return data`, or throw an `Error` with `.statusCode` set: `throw Object.assign(new Error('bad input'), { statusCode: 400 })`. (If `@fastify/sensible` is registered, `throw fastify.httpErrors.badRequest('...')` works too—but `httpErrors` is not core; it requires that plugin.)
+- `req.body as any` or skipping schema. Use a type provider: `@fastify/type-provider-json-schema-to-ts`, `@fastify/type-provider-typebox`, or `@fastify/type-provider-zod`.
+- Calling `reply.send(...)` in an async handler without `return reply` / `await reply` (race condition), or both returning a value and calling `reply.send` (the first wins, the second is discarded with a warning). Either `reply.code(400)` then `return data`, `return reply.code(400).send(data)`, or throw an `Error` with `.statusCode` set: `throw Object.assign(new Error('bad input'), { statusCode: 400 })`. (If `@fastify/sensible` is registered, `throw fastify.httpErrors.badRequest('...')` works too—but `httpErrors` is not core; it requires that plugin.)
 - Registering plugins after `fastify.listen()`. Order: register all plugins → `await fastify.ready()` → `fastify.listen()`.
 - Hand-rolled CORS / cookie / rate-limit / helmet / multipart / static / websocket. Use the official plugins: `@fastify/cors`, `@fastify/cookie`, `@fastify/rate-limit`, `@fastify/helmet`, `@fastify/multipart`, `@fastify/static`, `@fastify/websocket`.
-- Hand-rolled runtime type guards when the route `schema` + type provider already covers it. Pick a type provider: `@fastify/type-provider-typebox` (official) or `fastify-type-provider-zod` (community, no `@fastify/` prefix).
+- Hand-rolled runtime type guards when the route `schema` + type provider already covers it. Pick an official type provider: `@fastify/type-provider-typebox` (`npm i typebox @fastify/type-provider-typebox`) or `@fastify/type-provider-zod` (`npm i zod @fastify/type-provider-zod`).
 - Writing a new plugin when the project already has one under `src/plugins/` or `plugins/` covering the same concern (cors, auth, db connection, etc.). grep first; reuse if found.
 
 ## Encapsulation in practice
@@ -132,10 +140,10 @@ If a third-party library does not provide a Fastify plugin, **STOP** and report:
 ## Verification (run after edits that import fastify)
 
 ```bash
-grep -rnE 'fastify\(\)' --include='*.ts' --include='*.js' .
-grep -rnE 'function\s*\(fastify[^)]*,\s*opts[^)]*,\s*done\)' --include='*.ts' --include='*.js' .   # done-style callback
-grep -rnE 'fastify\.decorate\(' --include='*.ts' --include='*.js' . | grep -v 'fp('               # decorate without fp wrapper
-grep -rnE 'fastify\.(post|put|patch|delete)\([^,]+,\s*async' --include='*.ts' --include='*.js' .   # check missing schema
+grep -rnE 'FastifyPluginCallback\b|\(\s*(fastify|app|instance|server)\b[^()]*,[^()]*,\s*(done|next)\b' --include='*.ts' --include='*.js' --include='*.mjs' --exclude-dir=node_modules .   # done-style plugin
+grep -rlE --null '\.decorate(Request|Reply)?\(' --include='*.ts' --include='*.js' --include='*.mjs' --exclude-dir=node_modules . | xargs -0 grep -L 'fastify-plugin'   # decorates without importing fastify-plugin (fine if intentionally local)
+grep -rnE '\.decorate(Request|Reply)\([^,]+,\s*[[{]' --include='*.ts' --include='*.js' --include='*.mjs' --exclude-dir=node_modules . | grep -vE ',\s*\{\s*(getter|setter)\b'   # reference-type Request/Reply decorator
+grep -rnE '\b(fastify|app|server|instance)\.(post|put|patch|delete)\([^,]+,\s*(async\b|function\b|\()' --include='*.ts' --include='*.js' --include='*.mjs' --exclude-dir=node_modules .   # route without schema
 ```
 
 Reference: https://fastify.dev/docs/latest/Reference/Plugins/
