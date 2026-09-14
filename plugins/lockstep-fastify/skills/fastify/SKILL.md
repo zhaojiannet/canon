@@ -6,9 +6,6 @@ paths:
   - "**/*.tsx"
   - "**/*.js"
   - "**/*.mjs"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets Fastify v5 · verified 2026-09 (latest 5.12.4; v6 is still in alpha).
