@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lockstep-nuxt-ui",
   "description": "Strict Nuxt UI v4 component-first conventions. Auto-activates on .vue files; use U-prefix components (UButton, UModal, UForm…) instead of hand-written raw HTML.",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
