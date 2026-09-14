@@ -9,7 +9,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets TypeScript 7 · verified 2026-07 (latest 7.0.2, released 2026-07-08).
+> Targets TypeScript 7 · verified 2026-09 (latest 7.0.2, released 2026-07-08).
 
 This skill enforces TypeScript strict type-checking. The rule: trust the type system, no escape hatches.
 
@@ -19,7 +19,7 @@ Apply only when the project uses `typescript ^7.0` or higher. If `package.json` 
 
 TypeScript 7 ships these on by default. Do not write them out, and do not turn them off:
 
-`strict` (which brings `noImplicitAny` / `strictNullChecks` / `strictFunctionTypes` / `strictBindCallApply` / `strictPropertyInitialization` / `noImplicitThis` / `alwaysStrict` / `useUnknownInCatchVariables` / `strictBuiltinIteratorReturn`), `module` at `esnext`, `target` at the current stable ES version, `noUncheckedSideEffectImports`, and `stableTypeOrdering` (which cannot be disabled). `alwaysStrict` is forced true.
+`strict` (which brings `noImplicitAny` / `strictNullChecks` / `strictFunctionTypes` / `strictBindCallApply` / `strictPropertyInitialization` / `noImplicitThis` / `alwaysStrict` / `useUnknownInCatchVariables` / `strictBuiltinIteratorReturn`), `module` at `esnext`, `target` at the current stable ES version, `noUncheckedSideEffectImports`, and `stableTypeOrdering` (which cannot be disabled). `alwaysStrict` is forced true. `libReplacement` now defaults to `false`.
 
 Two defaults that catch people on upgrade:
 
@@ -137,13 +137,15 @@ Do not silently scatter `as any` or `// @ts-ignore`.
 ## Verification (grep after every .ts change)
 
 ```bash
-grep -rnE ':\s*any\b|<any>|as any' --include='*.ts' --include='*.tsx' .
+grep -rnE ':\s*any\b|\bas\s+any\b|<\s*any\s*[],>]|,\s*any\s*[],>]|\bany\[\]' --include='*.ts' --include='*.tsx' .
 grep -rnE '@ts-ignore' --include='*.ts' --include='*.tsx' .
-grep -rnE '\bnamespace\s+\w+\s*\{' --include='*.ts' --include='*.tsx' .
-grep -rnE '^\s*enum\s+\w+\s*\{' --include='*.ts' --include='*.tsx' .  # non-const enum
-grep -rnE 'catch\s*\(\s*\w+\s*\)\s*\{[^}]*\.message' --include='*.ts' --include='*.tsx' .
-grep -rnE '"(baseUrl|outFile|downlevelIteration)"' --include='tsconfig*.json' .   # removed in 7
-grep -rnE '"(target|moduleResolution)"\s*:\s*"(es5|node|node10|classic)"' --include='tsconfig*.json' .
+grep -rnE '^(export\s+)?(namespace|module)\s+[A-Za-z_$][A-Za-z0-9_$.]*\s*\{' --include='*.ts' --include='*.tsx' .   # top-level only; declare namespace / declare global stay
+grep -rnE '^\s*(export\s+)?(declare\s+)?enum\s+\w+' --include='*.ts' --include='*.tsx' .   # non-const enum
+grep -rniE '"(baseUrl|outFile|downlevelIteration)"\s*:' --include='tsconfig*.json' .   # removed in 7
+grep -rniE '"target"\s*:\s*"es5"' --include='tsconfig*.json' .
+grep -rniE '"moduleResolution"\s*:\s*"(node|node10|classic)"' --include='tsconfig*.json' .
+grep -rniE '"module"\s*:\s*"(amd|umd|system|systemjs|none)"' --include='tsconfig*.json' .
+grep -rniE '"(esModuleInterop|allowSyntheticDefaultImports|alwaysStrict)"\s*:\s*false' --include='tsconfig*.json' .
 grep -rnE 'assert\s*\{' --include='*.ts' --include='*.tsx' .                       # import assertions -> with
 ```
 
