@@ -8,7 +8,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets Vue 3.5+ · verified 2026-07 (latest 3.5.40).
+> Targets Vue 3.5+ · verified 2026-09 (latest 3.5.42).
 
 This skill enforces Vue 3.5+ single-file component conventions. Composition API + `<script setup>` only; type-safe declarations; modern macros (`defineModel` / `useTemplateRef` / `useId`).
 
@@ -78,6 +78,7 @@ const id = useId()
 - Runtime array form `defineProps(['foo', 'bar'])` — use type declaration.
 - `PropType<T>` imports — type declaration replaces it.
 - `withDefaults(defineProps<T>(), { ... })` when project is on Vue 3.5+ — use reactive destructure with native defaults: `const { foo = 'x' } = defineProps<T>()`.
+- Passing a destructured prop directly into a function (`watch(foo, ...)` / `useComposable(foo)`) — it passes a value, not a reactive source. Wrap it in a getter: `watch(() => foo, ...)` / `useComposable(() => foo)`.
 - Untyped emits: `defineEmits(['change'])` — type declaration: `defineEmits<{ change: [id: string] }>()`.
 - Manual `props.modelValue` + `emit('update:modelValue', ...)` for v-model — use `defineModel()`.
 
@@ -130,14 +131,14 @@ grep -rE 'PropType' --include='*.vue' .                   # replace with type de
 grep -rE "emit\('update:" --include='*.vue' .             # check if it can move to defineModel
 
 # string ref
-grep -rE 'ref="[a-zA-Z]+"' --include='*.vue' . | grep -v useTemplateRef  # 3.5+ should use useTemplateRef
+grep -rlE '(^|[[:space:]])ref="[^"]+"' --include='*.vue' . | tr '\n' '\0' | xargs -0 grep -L 'useTemplateRef'  # files with static template refs but no useTemplateRef
 
 # legacy props pattern
 grep -rE 'defineProps\(\[' --include='*.vue' .            # array form — switch to type declaration
 grep -rE 'withDefaults\(' --include='*.vue' .             # 3.5+ should use destructuring defaults
 
 # SFC over 400 lines
-find . -name '*.vue' -exec wc -l {} \; | awk '$1>400 {print}'
+find . -name '*.vue' -not -path '*/node_modules/*' -exec wc -l {} \; | awk '$1>400 {print}'
 ```
 
 Full API: https://vuejs.org/api/sfc-script-setup
