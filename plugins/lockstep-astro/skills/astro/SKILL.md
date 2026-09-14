@@ -1,6 +1,6 @@
 ---
 name: astro
-description: Enforce Astro 7 static-first conventions. Use when editing .astro files or when the user mentions Astro, islands, hydration, client directives, server:defer, content collections, or getCollection. Ships zero JS by default and picks the lightest client directive that works — client:visible or client:idle ahead of client:load, getCollection ahead of Astro.glob.
+description: Enforce Astro 7 static-first conventions. Use when editing .astro files or when the user mentions Astro, islands, hydration, client directives, server:defer, content collections, or getCollection. Ships zero JS by default and picks the lightest client directive that works — client:visible or client:idle ahead of client:load, getCollection ahead of hand-rolled glob imports.
 paths:
   - "**/*.astro"
 allowed-tools:
@@ -8,7 +8,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets Astro 7 · verified 2026-07 (latest 7.1.3).
+> Targets Astro 7 · verified 2026-09 (latest 7.3.2).
 
 This skill enforces Astro static-first conventions. The rule: render to static HTML by default, ship JavaScript only where there is real interactivity, and pick the lightest hydration directive that works.
 
@@ -33,7 +33,7 @@ Client directives, content collections and server islands are unchanged — the 
 
 - **Default to zero JS**. Astro components render to HTML at build (or request) time and ship no JS. Adding `client:*` to a component opts into hydration—do it deliberately.
 - **Pick the lightest `client:*` that works**. The directive is a hydration trigger, not a rendering choice.
-- **Server islands (`server:defer`)** for personalized content within an otherwise static page. Use this instead of switching the whole page to SSR.
+- **Server islands (`server:defer`)** for personalized content within an otherwise static page. Use this instead of switching the whole page to SSR. Both `server:defer` and `prerender = false` need an adapter; if `astro.config.*` has none, **STOP** and ask before adding one.
 - **Content Collections** for typed markdown/MDX content. Do not hand-roll glob imports for blogs/docs.
 
 ## client:* hierarchy
@@ -60,8 +60,10 @@ Pick the first directive that fits, top to bottom:
 - Server-side data fetching inside an island that re-fetches on every hydration. Move the fetch to the parent `.astro` and pass as prop.
 - `Astro.props` mutated inside the component. Treat as immutable.
 - `getStaticPaths` returning thousands of paths without pagination or filtering. Build time grows.
-- `Astro.glob('../posts/*.md')`. Deprecated in Astro v5+. Use Content Collections (`getCollection()`) for content/markdown with typed schemas, or `import.meta.glob()` (with `eager: true` if you need synchronous import) for other file types.
-- Mixing `output: 'static'` with `client:load` on dynamic components that need fresh data per request. Use `server:defer` or set `prerender = false` for that route.
+- `Astro.glob('../posts/*.md')`. Removed in Astro 6. Use Content Collections (`getCollection()`) for content/markdown with typed schemas, or `Object.values(import.meta.glob('../posts/*.md', { eager: true }))` for other files. `import.meta.glob()` does not return a `Promise`, so drop the `await`.
+- `Astro` inside `getStaticPaths()`. Deprecated in Astro 6. Replace `Astro.site` with `import.meta.env.SITE` and delete `Astro.generator`.
+- `<ViewTransitions />`. Removed in Astro 6. Import and render `<ClientRouter />` from `astro:transitions` instead.
+- Mixing `output: 'static'` with `client:load` on dynamic components that need fresh data per request. Use `server:defer` or set `prerender = false` for that route (both need an adapter — see above).
 - A new island / component when the project already has an equivalent under `src/components/`. grep first; reuse or extend if found.
 
 ## Server islands
@@ -89,14 +91,15 @@ Astro 5+ uses the `loader` API in `src/content.config.ts` (note the new file pat
 
 ```ts
 // src/content.config.ts
-import { defineCollection, z } from 'astro:content'
+import { defineCollection } from 'astro:content'
 import { glob } from 'astro/loaders'
+import { z } from 'astro/zod'
 
 const blog = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
   schema: z.object({
     title: z.string(),
-    pubDate: z.date(),
+    pubDate: z.coerce.date(),
     tags: z.array(z.string()).default([])
   })
 })
@@ -112,13 +115,14 @@ const posts = await getCollection('blog')
 ```
 
 Do not use:
-- `Astro.glob('../posts/*.md')` — deprecated in v5+. For non-content files, use `import.meta.glob()` instead.
+- `Astro.glob('../posts/*.md')` — removed in v6. For non-content files, use `import.meta.glob()` instead.
+- `z` from `astro:content` or `astro:schema` — deprecated in v6. Import it from `astro/zod`.
 - `type: 'content'` / `type: 'data'` — replaced by the `loader` API.
 - `src/content/config.ts` — the file moved to `src/content.config.ts`.
 
 ## When you need full SSR
 
-If the page genuinely needs per-request data for the entire layout (signed-in dashboard root), set `export const prerender = false` on that route. Reach for `server:defer` first; full SSR only when the entire shell depends on request context.
+If the page genuinely needs per-request data for the entire layout (signed-in dashboard root), set `export const prerender = false` on that route. This needs an adapter; if the project has none, **STOP** and ask. Reach for `server:defer` first; full SSR only when the entire shell depends on request context.
 
 ## When the right hydration is unclear
 
@@ -128,7 +132,10 @@ If the page genuinely needs per-request data for the entire layout (signed-in da
 
 ```bash
 grep -rnE 'client:load' --include='*.astro' .                   # can it be downgraded to visible/idle?
-grep -rnE "Astro\.glob\(" --include='*.astro' --include='*.ts' .   # replace with getCollection
+grep -rnE "Astro\.glob\(" --include='*.astro' --include='*.ts' .   # removed in 6; getCollection or import.meta.glob
+grep -rnE '\bz\b[^}]*\}\s*from\s*.astro:content|astro:schema' --include='*.ts' --include='*.mts' --include='*.mjs' --include='*.astro' .   # import z from astro/zod
+grep -rnE '\bViewTransitions\b' --include='*.astro' --include='*.ts' .   # removed in 6; use ClientRouter
+grep -rlzE 'getStaticPaths([^}]|\n)*Astro\.' --include='*.astro' --include='*.ts' .   # Astro inside getStaticPaths; use import.meta.env.SITE
 grep -rnE '<Layout[^>]*client:' --include='*.astro' .           # don't put client:* on Layout
 ```
 
