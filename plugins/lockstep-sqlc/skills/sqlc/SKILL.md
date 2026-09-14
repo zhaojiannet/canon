@@ -11,7 +11,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets sqlc 1.31+ · verified 2026-07 (latest v1.31.1, released 2026-04-22).
+> Targets sqlc 1.31+ · verified 2026-09 (latest v1.31.1, released 2026-04-22).
 
 This skill enforces sqlc 1.31+ conventions for Go projects with PostgreSQL. The rule: SQL is the source of truth, Go calls go through the generated `Querier` interface only.
 
@@ -37,17 +37,17 @@ sql:
         sql_package: pgx/v5
 ```
 
-- **`version: "2"`** required. v1 is deprecated.
+- **`version: "2"`** required. v1 is the older format, and plugins only work with v2.
 - **`emit_interface: true`** generates the `Querier` interface so handlers can mock easily.
 - **`sql_package: pgx/v5`** preferred over `database/sql` for PostgreSQL.
+- **`emit_pointers_for_null_types: true`** also turns nullable enum columns into pointers since v1.31; set `emit_pointers_for_null_enum_types: false` to keep the `NullXxx` wrapper structs.
 - **`schema:` points to migrations**, not to a hand-written schema file. sqlc parses migrations to derive the schema.
 
 ## Query naming convention
 
 | Prefix | Returns | Example |
 |---|---|---|
-| `Get` | exactly one row, error if missing | `GetUserByID` |
-| `Find` | one row or `nil`, no error if missing | `FindUserByEmail` |
+| `Get` | exactly one row (`:one`); zero value + `ErrNoRows` if missing | `GetUserByID` |
 | `List` | many rows | `ListUsersByOrg` |
 | `Count` | scalar count | `CountActiveUsers` |
 | `Create` | inserts and returns the created row | `CreateUser` |
@@ -74,7 +74,7 @@ INSERT INTO users (email, org_id) VALUES ($1, $2) RETURNING *;
 - Modifying generated files in `db/sqlc/` (e.g. `models.go`, `queries.sql.go`). They will be overwritten. Modify the SQL source and regenerate.
 - Defining the schema twice (once in migrations, once in a separate `schema.sql`). Point sqlc at migrations.
 - Mixing pgx and `database/sql` in the same project. Pick one—`pgx/v5` preferred.
-- String concatenation to build dynamic queries. Use `sqlc.arg()`, `sqlc.embed()`, or write multiple named queries.
+- String concatenation to build dynamic queries. Use `sqlc.narg()` for optional parameters (e.g. `coalesce(sqlc.narg('name'), name)`), or write multiple named queries.
 - Query names that do not start with one of the prefixes above. `FetchUser`, `RetrieveUserByEmail` — pick the canonical prefix.
 - A new query when an existing one in `db/queries/*.sql` already covers the use case. grep query names and the underlying `SELECT/INSERT/UPDATE/DELETE` first; reuse or extend if found.
 
@@ -87,26 +87,27 @@ sqlc handles most CRUD plus aggregates, CTEs, and window functions. If you need:
 
 **STOP** and report:
 
-> Need to express [query shape]. sqlc patterns checked: [`sqlc.arg`, `sqlc.embed`, `ANY($1::int[])`]. None covers [specific gap]. Approve one of: (A) restructure with `ANY(?::type[])` for `IN`, (B) add a hand-written method on the `*db.Queries` receiver in a separate non-generated file (with comment), (C) different approach.
+> Need to express [query shape]. sqlc patterns checked: [`sqlc.arg`, `sqlc.narg`, `sqlc.embed`, `ANY($1::int[])`]. None covers [specific gap]. Approve one of: (A) restructure with `ANY(?::type[])` for `IN`, (B) add a hand-written method on the `*db.Queries` receiver in a separate non-generated file (with comment), (C) different approach.
 
 ## After every SQL change
 
-1. Run `sqlc vet` (linting against the schema)
-2. Run `sqlc generate`
-3. Commit both the SQL change and the generated Go output
-4. Run `go test ./...`
+1. Run `sqlc generate`
+2. Run `sqlc diff` (reports generated code that is stale or hand-edited)
+3. Run `sqlc vet` if `rules:` are configured in `sqlc.yaml` (it runs the lint rules defined there)
+4. Commit both the SQL change and the generated Go output
+5. Run `go test ./...`
 
 ## Verification (grep after every sqlc-related change)
 
 ```bash
 # config version
-grep -nE '^version:\s*"?1' **/sqlc.yaml **/sqlc.yml 2>/dev/null
+find . \( -name 'sqlc.yaml' -o -name 'sqlc.yml' \) -not -path '*/node_modules/*' -exec grep -HnE '^version:[[:space:]]*"?1' {} +
 
 # hand-written SQL calls (should be sqlc queries)
-grep -rnE 'db\.(Query|QueryRow|Exec)\(["`]\s*(SELECT|INSERT|UPDATE|DELETE)' --include='*.go' .
+grep -rniE '\.(Query|QueryRow|Exec)(Context)?\(([^,"`]*,[[:space:]]*)?["`][[:space:]]*(SELECT|INSERT|UPDATE|DELETE|WITH)' --include='*.go' .
 
 # query naming convention
-grep -nE '^-- name:\s+\w+' db/queries/*.sql | grep -vE ':\s+(Get|Find|List|Count|Create|Update|Delete)\w+'
+grep -nE '^-- name:[[:space:]]+[A-Za-z0-9_]+' db/queries/*.sql | grep -vE ':[[:space:]]+(Get|List|Count|Create|Update|Delete)[A-Za-z0-9_]+'
 ```
 
 Reference: https://docs.sqlc.dev/en/latest/reference/config.html
