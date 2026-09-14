@@ -13,7 +13,7 @@ A Claude Code plugin marketplace named `canon` (from *canonical* — "do it the 
 | Plugin | Governs | How it applies |
 |---|---|---|
 | **`lockstep-*`** (9 framework plugins) | Code conventions: one plugin per framework, enforcing the latest stable official practices for Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL, and forbidding deprecated patterns | Auto-activates by `paths` when you edit matching files |
-| **`flow`** | Three manual workflow commands: `go`, `cm`, `e2e` | Invoke manually: `/flow:go`, `/flow:cm`, `/flow:e2e` |
+| **`flow`** | Four manual workflow commands: `go`, `cm`, `e2e`, `pin` | Invoke manually: `/flow:go`, `/flow:cm`, `/flow:e2e`, `/flow:pin` |
 | **`plain-chinese`** | Chinese writing: forces plain Simplified Chinese, bans internet/workplace buzzwords and AI-tic phrasing, keeps real technical terms | An output style, always on once enabled |
 
 **Why the frameworks are split into 9 plugins instead of one bundle**: a plugin is the smallest install unit — install one and all its skills come along, with no way to pick. Splitting lets you install per project stack. An Astro site installs only `lockstep-astro`; the backend frameworks you don't use cost zero tokens (each skill's description consumes Claude's skill-listing budget).
@@ -77,7 +77,7 @@ Activation:
 
 ### Workflow commands: flow (manual)
 
-The `flow` plugin holds three manual workflow commands with `disable-model-invocation: true`: they fire only when you type `/`, Claude never triggers them automatically, and their description stays out of context — it's just a label in the `/` menu.
+The `flow` plugin holds four manual workflow commands with `disable-model-invocation: true`: they fire only when you type `/`, Claude never triggers them automatically, and their description stays out of context — it's just a label in the `/` menu.
 
 ```bash
 /plugin install flow@canon
@@ -89,8 +89,9 @@ The `flow` plugin holds three manual workflow commands with `disable-model-invoc
 | `go` | A discipline that runs through the whole task: check the latest official docs before acting, pick the best approach over a quick hack; actively guard security and leave no known vulnerabilities; don't fudge or work around problems; own mistakes honestly; report leftovers truthfully, never fake "done" | `/flow:go` |
 | `cm` | Commit the current changes in classified batches: group by the task list in context first, one commit does one thing, commit messages follow the spec, shown to you before committing, never push without consent | `/flow:cm` |
 | `e2e` | Full end-to-end test of the current project using its existing accounts and environment: read the project into a profile (entry points, accounts, side-effect levels, backup/restore, business rules) → write a plan and wait for your review → generate Playwright specs via the official `playwright-cli` skill → cross-cutting smoke on every page → run in a standalone container, classify each failure before fixing (app bugs are reported, never patched) → write a report. Every scenario carries a status in the plan, work resumes across sessions, and "todo" must be 0 at the end. The project under test gains only an `e2e/` directory and one `.gitignore` line; nothing Playwright-related is installed on the host | `/flow:e2e` |
+| `pin` | Pin down one UI bug that is hard to confirm by eye (timing, intermittent, multi-step) before fixing it: write a Playwright spec that reproduces it, choose how many runs from the reproduction rate → minimise the steps and list hypotheses → locate the cause from `error-context.md` and the trace → fix the app code → run only the related specs found by grep, never the full suite. The spec stays in `e2e/tests/repro/` as a regression test. Stops to ask before changing assertions, when no backup command exists, or after 3 failed fixes. Uses the same container setup as `e2e` | `/flow:pin` |
 
-> These are the author's personal workflow commands. `go` is general discipline anyone can use; `cm`'s commit-message format references the author's global `~/.claude/CLAUDE.md` spec — swap in your own; `e2e` drives planning, generation and healing through the official `playwright-cli` skill (installed by the container into the project's `e2e/`) — see `plugins/flow/skills/e2e/references/runner.md` for the runtime setup.
+> These are the author's personal workflow commands. `go` is general discipline anyone can use; `cm`'s commit-message format references the author's global `~/.claude/CLAUDE.md` spec — swap in your own; `e2e` drives planning, generation and healing through the official `playwright-cli` skill (installed by the container into the project's `e2e/`) — see `plugins/flow/skills/e2e/references/runner.md` for the runtime setup; `pin` shares that container and the diagnosis and timing references under `references/`.
 
 ---
 
