@@ -26,7 +26,7 @@
 
 コードを書いていると繰り返しこういう状況に出会います。Tailwind、Nuxt UI、Vue、TypeScript、Echo、Fastify、PostgreSQL は公式が一番直接的な書き方を提示しているのに、AI は長い会話のあと忘れて、独自 CSS を書き、公式 API を迂回し、一世代前の構文を書き始めます。気づくたびに手で直すしかありません。CLAUDE.md やグローバルメモリのようなソフトな制約は、長い会話のあとでは効きません。
 
-`lockstep-*` は Claude Code 公式の [skill 機構](https://code.claude.com/docs/en/skills) でこれを解決します。各 skill はファイルタイプ `paths` で自動的に有効化される markdown のルール文書です。`.vue` を編集すれば Vue / Nuxt UI のルールが、`.css` を編集すれば Tailwind のルールが、`.go` を編集すれば Echo / sqlc のルールが、`migrations/*.sql` を編集すれば PostgreSQL の表設計と migration 安全のルールが context に入ります。ルールはその場で読んで使うので、CLAUDE.md のように長い会話の途中で薄れることがありません。
+`lockstep-*` は Claude Code 公式の [skill 機構](https://code.claude.com/docs/en/skills) でこれを解決します。各 skill は、有効化されるタイミングを `paths` でファイルタイプごとに限定した markdown のルール文書です。`.vue` ファイルを扱うときは Vue / Nuxt UI のルールが、`.css` を扱うときは Tailwind のルールが、`.go` を扱うときは Echo / sqlc のルールが、`migrations/*.sql` を扱うときは PostgreSQL の表設計と migration 安全のルールが context に入ります。ルールはマッチするファイルを扱うときだけ読み込まれ、context を常時占有しません。長い会話で自動 compaction が走ると、各 skill は先頭 5,000 token だけが残り、全 skill で 25,000 token の予算を共有するため、早い時点で呼ばれた skill は丸ごと落ちることがあります。
 
 ### インストール
 
@@ -67,12 +67,12 @@
 | `lockstep-typescript` | `.ts/.tsx` | TypeScript 7 strict：strict は 7 のデフォルトで無効化しない。`unknown` + 絞り込みで `any` を代替、const オブジェクトで enum を代替、ES module で namespace を代替。7 で削除された `baseUrl` / `target es5` / `outFile` は書き換える | `/lockstep-typescript:typescript` |
 | `lockstep-echo` | `**/*.go` | Echo v5 エラー処理：`HTTPError` + 集中型 `HTTPErrorHandler`、`errors.Is`/`errors.As`、`%w` wrap、graceful shutdown | `/lockstep-echo:echo` |
 | `lockstep-sqlc` | `queries/*.sql, sqlc.yaml` | sqlc codegen：SQL を源とし、生成された `Querier` を通す。手書きの `database/sql` を禁止 | `/lockstep-sqlc:sqlc` |
-| `lockstep-fastify` | fastify を import する `.ts/.js/.mjs` | Fastify v5：カプセル化された plugin、`fastify-plugin` (fp) でスコープをまたぐ、JSON schema 検証で手書きを代替 | `/lockstep-fastify:fastify` |
+| `lockstep-fastify` | `.ts/.tsx/.js/.mjs`（fastify を import しているかは問わない） | Fastify v5：カプセル化された plugin、`fastify-plugin` (fp) でスコープをまたぐ、JSON schema 検証で手書きを代替 | `/lockstep-fastify:fastify` |
 | `lockstep-postgres` | `migrations/`、`schema/`、`migrate/`、`sqitch/` 下の `*.sql` | PostgreSQL 表設計 + migration 安全（統合）：snake_case + BIGSERIAL/UUID + timestamptz + 外部キー ON DELETE の明示；トランザクション包囲 + NOT NULL 追加は 3 ステップ + `CREATE INDEX CONCURRENTLY` + 破壊的操作は事前承認 | `/lockstep-postgres:postgres` |
 
 有効化の方法：
 
-- **自動**：`paths` にマッチするファイルを編集すると Claude Code が対応する skill を自動的に context に読み込みます（日常はほぼこれで、コマンドを手で打つことはまずありません）
+- **自動**：`paths` にマッチするファイルを扱うとき、Claude が対応する skill を自動的に context に読み込みます（日常はほぼこれで、コマンドを手で打つことはまずありません）
 - **手動**：`/lockstep-<フレームワーク>:<skill>`、例：`/lockstep-echo:echo`
 
 ### ワークフローコマンド：flow（手動トリガー）
@@ -87,7 +87,7 @@
 | コマンド | 機能 | 呼び出し |
 |---|---|---|
 | `go` | タスク全体を貫く作業規律：着手前に公式の最新ドキュメントを確認し、その場しのぎより最善の方法を選ぶ。セキュリティに関わるときは能動的に防御し、既知の脆弱性を残さない。何かが壊れたときはごまかしたり迂回したりしない。自分のミスは正直に引き受ける。作業が未完了なら、成功を装わず正直に報告する | `/flow:go` |
-| `cm` | 現在の変更をグループ分け・分類してコミット：context 内のタスクリストを優先してまとめ、関心事 1 つにつき 1 コミット、各メッセージを規約どおりに書き、コミット前にプランを提示し、同意なしに push しない | `/flow:cm` |
+| `cm` | 現在の変更をグループ分け・分類してコミット：実際の `git diff` を基準にまとめ（context 内のタスクリストは手がかりにとどめる）、既定ではまとめたまま無理に分けず、関心事 1 つにつき 1 コミット、各メッセージを規約どおりに書き、コミット前にプランを提示し、同意なしに push しない | `/flow:cm` |
 | `e2e` | 既存のアカウントと環境で現在のプロジェクトを全量 E2E テスト：プロジェクトを読んでプロファイル化（入口、アカウント、副作用レベル、バックアップ／復元、業務ルール）→ 計画を書いてレビュー待ち → 公式 `playwright-cli` skill で Playwright spec を生成 → 全ページの横断スモーク → 独立コンテナで実行し、失敗は分類してから修正（アプリのバグは報告のみ、修正しない）→ レポート。計画の各シナリオに状態を持たせ、セッションをまたいで続行、終了時に「未着手」は 0 でなければならない。対象プロジェクトに増えるのは `e2e/` ディレクトリと `.gitignore` の 1 行だけ；ホストには Playwright 関連を一切インストールしない | `/flow:e2e` |
 | `pin` | 目視では確認しにくい UI バグ（タイミング、断続的、複数ステップの操作）を 1 つ固定してから修正：まず Playwright spec で再現し、再現率から実行回数を決める → 手順を最小化し仮説を挙げる → `error-context.md` と trace で原因を特定 → アプリのコードを修正 → grep で見つけた関連 spec だけを実行し、全量は流さない。spec は `e2e/tests/repro/` に回帰テストとして残す。アサーションの変更、バックアップコマンドがない場合、3 回続けて直らない場合は止まって確認する。コンテナは `e2e` と同じ構成を使う | `/flow:pin` |
 
@@ -120,11 +120,11 @@ Claude Code に平易な中国語を強制し、ネット隠語と職場隠語�
 
 この plugin の output-style は `force-for-plugin: true` を設定しているので、**インストールして有効にすれば自動的に効き、手動で選ぶ必要はありません**。現在の output-style 設定を上書きします。
 
-> output-style はシステムプロンプトの一部で、Claude Code は会話を開始するたびに一度読み込みます。変更後は `/clear` するか新しい会話を始めないと反映されません。
+> 会話の途中で output-style を切り替えると、次のメッセージから新しいスタイルで応答します（v2.1.251 より前は `/clear` するか新しい会話を始めるまで反映されませんでした）。plugin の output-style ファイルを編集したら、`/reload-plugins` を実行するか Claude Code を再起動します。
 
 一時的に切りたいとき：`/plugin` の中で `plain-chinese` を無効化します。自分で output-style を手動管理したいとき（自動強制ではなく）：`plugins/plain-chinese/output-styles/plain-chinese.md` の中の `force-for-plugin: true` を削除し、`/config` → Output style で手動選択に切り替えます。
 
-> 注意：旧来の `/output-style` コマンドは Claude Code v2.1.73 で deprecated、v2.1.91 で削除され、現在は `/config` に統一されています。
+> 注意：`/output-style` コマンドは Claude Code v2.1.73 で deprecated、v2.1.91 で削除されましたが、v2.1.269 で `/output-style [name]` として再追加され、スタイルの一覧表示と切り替えができます。`/config` → Output style でも選べます。
 
 ---
 
@@ -157,7 +157,7 @@ v0.5 ではフレームワーク skill を全部 `canon` という 1 つの plug
 
 ## How it works
 
-各 `lockstep-*` の skill は markdown のルール文書で、次を含みます：核心原則、禁止項目 + 簡潔な理由、旧 API → 新 API の対応表、表現できないときは迂回せず報告する STOP シグナル、シナリオ別ルール、書き終えたあとの自己チェック用 grep リスト。Claude Code は `paths` にマッチするファイルを編集するときに該当する SKILL.md を context に読み込みます。常時占有するのではなく、必要なときに読み込みます。
+各 `lockstep-*` の skill は markdown のルール文書で、次を含みます：核心原則、禁止項目 + 簡潔な理由、旧 API → 新 API の対応表、表現できないときは迂回せず報告する STOP シグナル、シナリオ別ルール、書き終えたあとの自己チェック用 grep リスト。Claude は `paths` にマッチするファイルを扱うときだけ該当する SKILL.md を context に読み込みます。常時占有するのではなく、必要なときに読み込みます。
 
 `plain-chinese` の output-style は、禁止語の対応表、AI 口癖リスト、専門用語のホワイトリスト、セルフチェックリストをシステムプロンプトに追加し、毎ターンの返信で効きます。
 

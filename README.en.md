@@ -26,7 +26,7 @@ A Claude Code plugin marketplace named `canon` (from *canonical* — "do it the 
 
 You hit this constantly: Tailwind, Nuxt UI, Vue, TypeScript, Echo, Fastify, PostgreSQL all document the most direct way to do something, yet deep into a long session the AI forgets, hand-rolls CSS, bypasses the official API, or writes last-generation syntax. You correct it by hand every time. Soft constraints like CLAUDE.md or global memory don't hold up over a long session.
 
-`lockstep-*` solves this with Claude Code's official [skill mechanism](https://code.claude.com/docs/en/skills): each skill is a markdown rule document that auto-activates by file type via `paths` — edit `.vue` and the Vue / Nuxt UI rules enter context, edit `.css` and Tailwind enters, edit `.go` and Echo / sqlc enter, edit `migrations/*.sql` and the PostgreSQL schema + migration-safety rules enter. Rules are read fresh on demand, never faded out like CLAUDE.md after a long session.
+`lockstep-*` solves this with Claude Code's official [skill mechanism](https://code.claude.com/docs/en/skills): each skill is a markdown rule document whose `paths` limit by file type when it activates — work with `.vue` files and the Vue / Nuxt UI rules enter context, work with `.css` and Tailwind enters, work with `.go` and Echo / sqlc enter, work with `migrations/*.sql` and the PostgreSQL schema + migration-safety rules enter. Rules load only while Claude works with matching files, not permanently resident in context; after auto-compaction in a long session, each skill keeps only its first 5,000 tokens within a shared 25,000-token budget, and skills invoked earlier can be dropped entirely.
 
 ### Install
 
@@ -67,12 +67,12 @@ Verify: type `/plugin`, open the **Installed** tab, and you'll see the `lockstep
 | `lockstep-typescript` | `.ts/.tsx` | TypeScript 7 strict: strict is the default in 7 and stays on; `unknown` plus narrowing over `any`, const objects over enum, ES modules over namespace; rewrite the flags 7 removed (`baseUrl` / `target es5` / `outFile`) | `/lockstep-typescript:typescript` |
 | `lockstep-echo` | `**/*.go` | Echo v5 error handling: `HTTPError` + central `HTTPErrorHandler`, `errors.Is`/`errors.As`, `%w` wrap, graceful shutdown | `/lockstep-echo:echo` |
 | `lockstep-sqlc` | `queries/*.sql, sqlc.yaml` | sqlc codegen: SQL is the source of truth, calls go through the generated `Querier`, no hand-written `database/sql` | `/lockstep-sqlc:sqlc` |
-| `lockstep-fastify` | `.ts/.js/.mjs` importing fastify | Fastify v5: encapsulated plugins, `fastify-plugin` (fp) for cross-scope, JSON schema validation over manual | `/lockstep-fastify:fastify` |
+| `lockstep-fastify` | `.ts/.tsx/.js/.mjs` (whether or not they import fastify) | Fastify v5: encapsulated plugins, `fastify-plugin` (fp) for cross-scope, JSON schema validation over manual | `/lockstep-fastify:fastify` |
 | `lockstep-postgres` | `*.sql` under `migrations/`, `schema/`, `migrate/`, `sqitch/` | PostgreSQL schema design + migration safety (merged): snake_case + BIGSERIAL/UUID + timestamptz + explicit FK ON DELETE; transaction-wrapped + 3-step NOT NULL + `CREATE INDEX CONCURRENTLY` + destructive ops gated behind approval | `/lockstep-postgres:postgres` |
 
 Activation:
 
-- **Automatic**: editing a file matching `paths` loads the corresponding skill into context (this is the main path day to day — you rarely type the command)
+- **Automatic**: when Claude works with a file matching `paths`, it loads the corresponding skill into context (this is the main path day to day — you rarely type the command)
 - **Manual**: `/lockstep-<framework>:<skill>`, e.g. `/lockstep-echo:echo`
 
 ### Workflow commands: flow (manual)
@@ -87,7 +87,7 @@ The `flow` plugin holds four manual workflow commands with `disable-model-invoca
 | Command | What it does | Invoke |
 |---|---|---|
 | `go` | A discipline that runs through the whole task: check the latest official docs before acting, pick the best approach over a quick hack; actively guard security and leave no known vulnerabilities; don't fudge or work around problems; own mistakes honestly; report leftovers truthfully, never fake "done" | `/flow:go` |
-| `cm` | Commit the current changes in classified batches: group by the task list in context first, one commit does one thing, commit messages follow the spec, shown to you before committing, never push without consent | `/flow:cm` |
+| `cm` | Commit the current changes in classified batches: group by the actual `git diff` (a task list in context is only a hint), keep changes together by default rather than splitting, one commit does one thing, commit messages follow the spec, shown to you before committing, never push without consent | `/flow:cm` |
 | `e2e` | Full end-to-end test of the current project using its existing accounts and environment: read the project into a profile (entry points, accounts, side-effect levels, backup/restore, business rules) → write a plan and wait for your review → generate Playwright specs via the official `playwright-cli` skill → cross-cutting smoke on every page → run in a standalone container, classify each failure before fixing (app bugs are reported, never patched) → write a report. Every scenario carries a status in the plan, work resumes across sessions, and "todo" must be 0 at the end. The project under test gains only an `e2e/` directory and one `.gitignore` line; nothing Playwright-related is installed on the host | `/flow:e2e` |
 | `pin` | Pin down one UI bug that is hard to confirm by eye (timing, intermittent, multi-step) before fixing it: write a Playwright spec that reproduces it, choose how many runs from the reproduction rate → minimise the steps and list hypotheses → locate the cause from `error-context.md` and the trace → fix the app code → run only the related specs found by grep, never the full suite. The spec stays in `e2e/tests/repro/` as a regression test. Stops to ask before changing assertions, when no backup command exists, or after 3 failed fixes. Uses the same container setup as `e2e` | `/flow:pin` |
 
@@ -120,11 +120,11 @@ To be clear: **nothing can eliminate it 100%**. The model generates text probabi
 
 This plugin's output style sets `force-for-plugin: true`, so **it applies automatically once installed and enabled — no manual selection**. It overrides your current output style.
 
-> An output style is part of the system prompt, read once at the start of each Claude Code session. Run `/clear` or start a new session for changes to take effect.
+> When you switch output styles mid-session, Claude uses the new style starting with your next message (before v2.1.251 it applied only after `/clear` or a new session). After editing a plugin's output style file, run `/reload-plugins` or restart Claude Code.
 
 To turn it off temporarily: disable `plain-chinese` in `/plugin`. To manage the output style yourself (instead of forcing it): remove `force-for-plugin: true` from `plugins/plain-chinese/output-styles/plain-chinese.md` and select it via `/config` → Output style.
 
-> Note: the old `/output-style` command was deprecated in Claude Code v2.1.73 and removed in v2.1.91 — use `/config` now.
+> Note: the `/output-style` command was deprecated in Claude Code v2.1.73 and removed in v2.1.91; v2.1.269 added `/output-style [name]` back to list and switch styles. `/config` → Output style also works.
 
 ---
 
@@ -157,7 +157,7 @@ This repo was once called `claude-skills` with a marketplace named `lockstep-run
 
 ## How it works
 
-Each `lockstep-*` skill is a markdown rule document with: core principles, forbidden items + brief reasons, old-API → new-API tables, STOP signals to report rather than work around when something can't be expressed, scenario rules, and a grep checklist to self-verify after writing. Claude Code loads the matching SKILL.md into context when you edit a file matching `paths` — on demand, not permanently resident.
+Each `lockstep-*` skill is a markdown rule document with: core principles, forbidden items + brief reasons, old-API → new-API tables, STOP signals to report rather than work around when something can't be expressed, scenario rules, and a grep checklist to self-verify after writing. Claude loads the matching SKILL.md into context only when working with a file matching `paths` — on demand, not permanently resident.
 
 `plain-chinese`'s output style adds the banned-word tables, AI-tic list, technical-term allowlist, and self-check list into the system prompt, applying on every turn.
 

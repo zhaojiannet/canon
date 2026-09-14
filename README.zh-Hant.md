@@ -26,7 +26,7 @@
 
 寫程式碼反覆遇到這種情形：Tailwind、Nuxt UI、Vue、TypeScript、Echo、Fastify、PostgreSQL 官方明明給了最直接的寫法，AI 在長會話之後轉頭就忘，自己造 CSS、繞過官方 API、寫上一代舊語法。每次發現都得手動糾正一遍。CLAUDE.md、全域 memory 這種軟約束在長會話後壓不住。
 
-`lockstep-*` 用 Claude Code 官方的 [skill 機制](https://code.claude.com/docs/en/skills) 解決：每個 skill 是一份 markdown 規則文件，按檔案類型 `paths` 自動啟用——編輯 `.vue` 時 Vue / Nuxt UI 規則進 context，編輯 `.css` 時 Tailwind 規則進 context，編輯 `.go` 時 Echo / sqlc 規則進 context，編輯 `migrations/*.sql` 時 PostgreSQL 表設計與遷移安全規則進 context。規則現讀現用，不會像 CLAUDE.md 在長會話後被淡忘。
+`lockstep-*` 用 Claude Code 官方的 [skill 機制](https://code.claude.com/docs/en/skills) 解決：每個 skill 是一份 markdown 規則文件，用 `paths` 按檔案類型限定何時啟用——處理 `.vue` 檔案時 Vue / Nuxt UI 規則進 context，處理 `.css` 時 Tailwind 規則進 context，處理 `.go` 時 Echo / sqlc 規則進 context，處理 `migrations/*.sql` 時 PostgreSQL 表設計與遷移安全規則進 context。規則只在處理匹配的檔案時才載入，不長期佔用 context；長會話自動壓縮後，每個 skill 只保留前 5,000 token，所有 skill 共用 25,000 token 預算，呼叫較早的可能被整個丟掉。
 
 ### 安裝
 
@@ -67,12 +67,12 @@
 | `lockstep-typescript` | `.ts/.tsx` | TypeScript 7 strict：strict 在 7 裡是預設值、不許關；`unknown` + 收窄替代 `any`，const 物件替代 enum，ES module 替代 namespace；7 移除的 `baseUrl` / `target es5` / `outFile` 一律改寫 | `/lockstep-typescript:typescript` |
 | `lockstep-echo` | `**/*.go` | Echo v5 錯誤處理：`HTTPError` + 集中 `HTTPErrorHandler`、`errors.Is`/`errors.As`、`%w` wrap、graceful shutdown | `/lockstep-echo:echo` |
 | `lockstep-sqlc` | `queries/*.sql, sqlc.yaml` | sqlc codegen：SQL 為源、走產生的 `Querier`、禁手寫 `database/sql` | `/lockstep-sqlc:sqlc` |
-| `lockstep-fastify` | 含 fastify import 的 `.ts/.js/.mjs` | Fastify v5：封裝式 plugin、`fastify-plugin` (fp) 跨作用域、JSON schema 驗證替代手寫 | `/lockstep-fastify:fastify` |
+| `lockstep-fastify` | `.ts/.tsx/.js/.mjs`（不區分是否 import fastify） | Fastify v5：封裝式 plugin、`fastify-plugin` (fp) 跨作用域、JSON schema 驗證替代手寫 | `/lockstep-fastify:fastify` |
 | `lockstep-postgres` | `migrations/`、`schema/`、`migrate/`、`sqitch/` 下 `*.sql` | PostgreSQL 表設計 + 遷移安全（合併）：snake_case + BIGSERIAL/UUID + timestamptz + 外鍵 ON DELETE；交易包裹 + NOT NULL 加欄分三步 + `CREATE INDEX CONCURRENTLY` + 破壞性操作先審批 | `/lockstep-postgres:postgres` |
 
 啟用方式：
 
-- **自動**：編輯匹配 `paths` 的檔案時 Claude Code 自動載入對應 skill 進 context（日常主要靠這個，幾乎不用手敲命令）
+- **自動**：處理匹配 `paths` 的檔案時 Claude 自動載入對應 skill 進 context（日常主要靠這個，幾乎不用手敲命令）
 - **手動**：`/lockstep-<框架>:<skill>`，例如 `/lockstep-echo:echo`
 
 ### 工作流命令：flow（手動觸發）
@@ -87,7 +87,7 @@
 | 命令 | 做什麼 | 呼叫 |
 |---|---|---|
 | `go` | 一套貫穿任務的工作紀律：開始幹活先查官方最新文件再動手、選最佳方案不選臨時做法；涉及安全時主動防護、不留已知漏洞；遇到問題不糊弄、不繞過；做錯時誠實承認；有遺留時如實交代、不謊報完成 | `/flow:go` |
-| `cm` | 把當前改動分批分類提交：優先按上下文裡的任務清單分組、一個 commit 只做一件事，commit message 按規範寫，提交前列給你確認，未經同意不 push | `/flow:cm` |
+| `cm` | 把當前改動分批分類提交：以實際 `git diff` 為準分組（上下文裡的任務清單只當線索）、預設合在一起不硬拆、一個 commit 只做一件事，commit message 按規範寫，提交前列給你確認，未經同意不 push | `/flow:cm` |
 | `e2e` | 用現有帳號和環境給當前專案做全量端到端測試：先讀專案出畫像（入口、帳號、副作用分級、備份恢復、業務口徑）→ 出計畫等你審 → 按官方 `playwright-cli` skill 生成 Playwright spec → 每頁橫切面冒煙 → 獨立容器裡跑、失敗先定性再修（應用 bug 只報不改）→ 出報告。計畫裡每條場景帶狀態，跨會話續做，收尾「待做」必須為 0。被測專案只多一個 `e2e/` 目錄和一行 `.gitignore`，宿主機不裝任何 Playwright 元件 | `/flow:e2e` |
 | `pin` | 把一個肉眼難確認的介面 bug（時序、偶發、多步互動）釘住再修：先寫 Playwright spec 重現，按重現率決定跑幾次 → 縮到最少步驟、列假設 → 按 `error-context.md` 和 trace 定位 → 改應用程式碼 → 只跑 grep 出的相關 spec，不跑全量。spec 留在 `e2e/tests/repro/` 作回歸。改斷言、缺備份命令、連續 3 次修不好時停下問你。容器沿用 `e2e` 的搭法 | `/flow:pin` |
 
@@ -120,11 +120,11 @@
 
 這個插件的 output-style 設了 `force-for-plugin: true`，**裝完啟用就自動生效，不用手動選**。它會覆蓋你當前的 output-style 設定。
 
-> output-style 是系統提示的一部分，Claude Code 每次會話開始時讀一次。改完要 `/clear` 或開新會話才生效。
+> 會話中途切換 output-style，從下一則訊息起就按新風格回覆（v2.1.251 之前要 `/clear` 或開新會話才生效）。改了插件裡的 output-style 檔案，要執行 `/reload-plugins` 或重新啟動 Claude Code。
 
 想暫時關掉：在 `/plugin` 裡停用 `plain-chinese`。想自己手動管理 output-style（而不是自動強制）：把 `plugins/plain-chinese/output-styles/plain-chinese.md` 裡的 `force-for-plugin: true` 刪掉，改用 `/config` → Output style 手動選。
 
-> 注意：舊的 `/output-style` 命令在 Claude Code v2.1.73 棄用、v2.1.91 移除，現在統一用 `/config`。
+> 注意：`/output-style` 命令曾在 Claude Code v2.1.73 棄用、v2.1.91 移除，v2.1.269 又加回了 `/output-style [name]`，可以列出和切換風格；也可以用 `/config` → Output style。
 
 ---
 
@@ -157,7 +157,7 @@ v0.5 把框架 skill 全打包在 `canon` 一個插件裡。v0.6 拆成 `lockste
 
 ## How it works
 
-每個 `lockstep-*` 的 skill 是一份 markdown 規則文件，包含：核心原則、禁用項 + 簡短原因、舊 API → 新 API 對照表、表達不出來時報告而非繞過的 STOP 訊號、場景化規則、寫完自查的 grep 清單。Claude Code 在編輯匹配 `paths` 的檔案時把對應 SKILL.md 載入 context，按需載入而非長期佔用。
+每個 `lockstep-*` 的 skill 是一份 markdown 規則文件，包含：核心原則、禁用項 + 簡短原因、舊 API → 新 API 對照表、表達不出來時報告而非繞過的 STOP 訊號、場景化規則、寫完自查的 grep 清單。Claude 在處理匹配 `paths` 的檔案時才把對應 SKILL.md 載入 context，按需載入而非長期佔用。
 
 `plain-chinese` 的 output-style 把禁用詞對照表、AI 口頭禪清單、專業術語白名單、自檢清單加進系統提示，每輪回覆都生效。
 
