@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "flow",
-  "description": "Three manual workflow commands for Claude Code: /flow:go (work discipline — verify before acting, fix root causes, consider security, never report false progress), /flow:cm (batched, spec-compliant commits) and /flow:e2e (profile the project, plan, human review, generate Playwright specs, run and heal, report). Manual-only; they do not auto-activate.",
-  "version": "0.7.1",
+  "description": "Four manual workflow commands for Claude Code: /flow:go (work discipline — verify before acting, fix root causes, consider security, never report false progress), /flow:cm (batched, spec-compliant commits), /flow:e2e (profile the project, plan, human review, generate Playwright specs, run and heal, report) and /flow:pin (reproduce one UI bug with a Playwright spec, then fix it and keep the spec as a regression test). Manual-only; they do not auto-activate.",
+  "version": "0.8.0",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
@@ -16,6 +16,7 @@
     "git",
     "discipline",
     "e2e",
-    "playwright"
+    "playwright",
+    "debugging"
   ]
 }

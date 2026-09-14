@@ -110,4 +110,4 @@ setup('shop admin', async ({ page }) => {
 <exec> npx playwright cli list / close / kill-all
 ```
 
-失败现场在 `e2e/test-results/<用例>/trace.zip`，宿主机用浏览器打开 https://trace.playwright.dev 拖进去看。
+失败现场在 `e2e/test-results/<用例>/`：`error-context.md` 和 `trace.zip`。agent 用 `<exec> npx playwright trace ...` 在命令行读（顺序见 `diagnose.md`）；人要看就在宿主机浏览器打开 https://trace.playwright.dev 把 `trace.zip` 拖进去。

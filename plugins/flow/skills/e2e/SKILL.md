@@ -5,7 +5,7 @@ disable-model-invocation: true
 argument-hint: "[profile|plan|generate|run|report] [范围]"
 ---
 
-给当前项目做端到端测试。目标是把现有系统认真跑一遍、没有遗留，不是搭一套测试基建。
+给当前项目做端到端测试。目标是把现有系统认真跑一遍、没有遗留，不是搭一套测试基建。要复现并修某个界面 bug，用 `/flow:pin`。
 
 ## 三条底线
 
@@ -15,7 +15,7 @@ argument-hint: "[profile|plan|generate|run|report] [范围]"
 
 ## 前提
 
-- 规划 / 生成 / 修复的操作步骤按官方 skill 做：`e2e/.claude/skills/playwright-cli/references/test-generation.md` 的 §1 / §2 / §3。它由容器里 `npx playwright cli install --skills` 生成（见 runner.md），没有就先装。
+- 规划 / 生成 / 修复的操作步骤按官方 skill 做：`e2e/.claude/skills/playwright-cli/references/test-generation.md` 的 §1 / §2 / §3。它由容器里 `npx playwright cli install --skills` 生成（见 runner.md），没有就先装。修复时先按 `references/diagnose.md` 读现成的失败产物，读完仍不清楚才用 §3 的 attach。
 - 官方步骤假定 `playwright-cli` 装在宿主机。这里不是：**宿主机什么都不装**，官方步骤里的 `playwright-cli X` 一律执行 `<exec> npx playwright cli X`，`npx playwright X` 一律执行 `<exec> npx playwright X`，`<exec>` 是画像里定义的前缀（如 `docker exec -w /work <项目>-e2e`）。
 - 一条官方文档与实测不符：seed 只有一步时 `resume` 会让测试跑完、浏览器关闭。attach 后用 `step-over` 走到最后一步，页面停在「Close context」时才探索。attach 之后每条命令带 `-s=tw-xxxx`。
 
@@ -77,7 +77,7 @@ e2e/
 
 1. 按画像里的命令备份一次。备份失败就停，不往下跑。
 2. `<exec> npx playwright test [模块] --reporter=json`，输出存 `run-<日期>.json`。
-3. 每条失败按官方 §3 单独处理：`--grep` 限定这一条、`--debug=cli` 暂停、attach 看现场。先定性再动手：
+3. 每条失败 `--grep` 限定这一条，按 `references/diagnose.md` 的顺序查清原因。先定性再动手：
    - 测试写错（选择器、等待、断言）→ 改测试，重跑。
    - 环境（服务没起、账号登不上、前置数据不在）→ 能在底线内解决就解决；不能就标「阻塞」写进报告，继续下一条。
    - 应用 bug → 不改应用代码。记下复现路径、期望、实际，测试标 `test.fixme('<原因>')`，继续下一条。
@@ -93,7 +93,7 @@ e2e/
 ## 护栏
 
 - **副作用四级**：1 只读 / 2 库内可逆（自己建自己删）/ 3 库内不可逆 / 4 出库外部（支付、邮件、推送、打印、第三方 API）。1 / 2 自动跑；3 / 4 每次运行前逐条问我批不批，没批就跳过并写明。
-- **不改应用代码**。e2e 流程发现的 bug 只进报告。
+- **不改应用代码**。e2e 流程发现的 bug 只进报告；要修用 `/flow:pin`。
 - **不 mock 外部网关**。做不到就标跳过，不假装测过。
 - 只用 Playwright 自带 chromium。
 - 密码放 `e2e/.env`，spec 里用 `process.env.E2E_*`，不写明文进 spec。
