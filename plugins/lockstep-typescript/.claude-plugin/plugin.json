@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lockstep-typescript",
   "description": "Strict TypeScript 7 type-checking. Auto-activates on .ts/.tsx and tsconfig.json; strict is the default and stays on, unknown plus narrowing where any would go, const objects over enum, ES modules over namespace, and the flags 7 removed (baseUrl, target es5, outFile).",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
