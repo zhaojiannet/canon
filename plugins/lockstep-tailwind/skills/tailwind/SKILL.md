@@ -108,12 +108,14 @@ Even in Vue / React / Svelte, custom CSS is the official first choice — not a 
 | Markdown / CMS / WYSIWYG rendered HTML (no per-element component) | `@layer components { .prose h1 { ... } .prose p { ... } }` |
 | SVG charts where the library emits hardcoded class names (D3, ECharts, Chart.js inner SVG) | `@layer components` with descendant selectors |
 | Element-level resets (button cursor, placeholder color, list reset) | `@layer base { button { cursor: pointer } }` |
-| Global pseudo-elements (`::selection`, `::placeholder`, `::-webkit-scrollbar` parts the scrollbar utilities cannot reach) | `@layer base` |
+| Global pseudo-element defaults (`::placeholder` color for every input, `::-webkit-scrollbar` parts the scrollbar utilities cannot reach) | `@layer base` |
 | `@font-face`, `@keyframes` definitions | top-level CSS; animation tokens go in `@theme` |
 | New atomic CSS feature Tailwind doesn't ship | `@utility name { ... }` — not `@layer components` |
 | Theme tokens (colors, spacing, shadows, easings) | `@theme { --color-x: ... }` — not a class |
 
 Official wording: "Using Tailwind you probably don't need these types of classes as often as you think" — meaning project-internal `.btn` / `.card` are usually replaceable by components, but the rows above are the cases that **do** still need custom CSS, and rightfully so.
+
+Selection and placeholder styling is not on that list either: `selection:` is inheritable, so `selection:bg-*` / `selection:text-*` on `<body>` sets it site-wide; style one field's placeholder with `placeholder:text-*`.
 
 Scrollbars are not on that list: since 4.3 use `scrollbar-thin` / `scrollbar-none` / `scrollbar-auto`, `scrollbar-thumb-*` / `scrollbar-track-*` for color, and `scrollbar-gutter-*` (e.g. `scrollbar-gutter-stable`). Reach for `::-webkit-scrollbar` only for what these cannot express.
 
@@ -163,6 +165,7 @@ grep -rn --exclude-dir={node_modules,dist,.git} '@tailwind ' .   # should use @i
 grep -rnE --exclude-dir={node_modules,dist,.git} '@variants|@responsive|@screen' .   # deprecated
 grep -rnE --exclude-dir={node_modules,dist,.git} '(bg|text|border|divide|ring|placeholder)-opacity-|(^|[[:space:]"'\''`:])flex-(grow|shrink)([-[:space:]"'\''`]|$)' .   # slash opacity, grow/shrink
 grep -rn --exclude-dir={node_modules,dist,.git} 'bg-gradient-to-' .   # should use bg-linear-to-
+grep -rnE --exclude-dir={node_modules,dist,.git} '(^|[[:space:]"'\''`:])(start|end)-([0-9]|px|auto|full|\[|\()|(^|[[:space:]"'\''`:])(break-words|order-none)([[:space:]"'\''`]|$)|(bg|object)-(left|right)-(top|bottom)|[a-z]:transform-none' .   # deprecated or renamed in 4.x, see table
 grep -rnE --exclude-dir={node_modules,dist,.git} '["'\''`]([^"'\''`,&|?(){}=:]*[[:space:]])?([a-z0-9-]+:)*![a-z]' .   # prefix important inside class strings, should be suffix
 grep -rnE --exclude-dir={node_modules,dist,.git} '(^|[[:space:]"'\''`:])-?(text|p[xytrblse]?|m[xytrblse]?|gap(-[xy])?|space-[xy])-\[[0-9.]+(px|rem|em)?\]' .   # numeric font-size/spacing arbitrary values, use tokens
 grep -rn --exclude-dir={node_modules,dist,.git} 'darkMode:' .   # should migrate to @custom-variant
