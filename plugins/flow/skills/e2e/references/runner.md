@@ -33,8 +33,8 @@ docker exec -w /work $P-e2e npx playwright cli install --skills
 每个参数的理由：
 
 - 镜像 tag 必须等于 `@playwright/test` 版本，差一位找不到浏览器。
-- `--init`：官方要求，否则常驻进程变僵尸。
-- `--ipc=host`：官方要求，否则 Chromium 撑爆 64MB `/dev/shm` 中途崩。
+- `--init`：官方推荐，否则常驻进程变僵尸。
+- `--ipc=host`：官方推荐，否则 Chromium 撑爆 64MB `/dev/shm` 中途崩。
 - `--network container:$ENTRY`：与入口容器共用网络命名空间，`http://localhost:$PORT` 就是被测站。这样绕开 Vite dev server 的 Host 头校验（用 OrbStack 域名或容器名访问 Nuxt dev 会 403 `Blocked request`），不用改项目的 `allowedHosts`。代价：入口容器被重建（不是重启）后，e2e 容器要 `docker rm -f` 再起一次。
 - `node_modules` 直接落在 `e2e/node_modules/`：由容器安装，宿主机从不执行它，整个 `e2e/` 已被 gitignore。
 - `sleep infinity`：CLI 的常驻进程和 socket 都在容器里，容器必须长驻；一次性 `docker run --rm` 每次调用进程都没了。
@@ -56,7 +56,7 @@ export default defineConfig({
   testDir: './tests',
   forbidOnly: !!process.env.CI,
   retries: 0,
-  workers: 1,                       // 写操作共用一套现有数据，串行
+  workers: 1,                       // 写操作共用一套现有数据，全部测试串行
   reporter: 'list',
   use: {
     baseURL: process.env.BASE_URL,
@@ -71,7 +71,7 @@ export default defineConfig({
 })
 ```
 
-只跑 chromium。冒烟层只读，可以在它自己的 describe 里 `test.describe.configure({ mode: 'parallel' })`。
+只跑 chromium。`workers: 1` 下冒烟层也串行。
 
 ## 登录态
 

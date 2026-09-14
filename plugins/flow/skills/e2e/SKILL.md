@@ -97,7 +97,7 @@ e2e/
 - **不 mock 外部网关**。做不到就标跳过，不假装测过。
 - 只用 Playwright 自带 chromium。
 - 密码放 `e2e/.env`，spec 里用 `process.env.E2E_*`，不写明文进 spec。
-- 冒烟和只读测试可并行；写操作测试串行（`workers: 1`），避免互相踩数据。
+- 全部测试串行（`workers: 1`），避免写操作互相踩数据。
 - 不用 `networkidle`、不加 `sleep`、不跳过 hook 来让测试变绿。
 
 ## 收尾
