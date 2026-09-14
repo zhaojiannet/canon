@@ -8,7 +8,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets Nuxt UI v4 · verified 2026-07 (latest 4.10.0).
+> Targets Nuxt UI v4 · verified 2026-09 (latest 4.11.1).
 
 This skill enforces Nuxt UI v4 component-first conventions. The rule: when Nuxt UI provides a component, use it instead of hand-writing raw HTML.
 
@@ -25,22 +25,24 @@ Apply only when the project uses `@nuxt/ui ^4.0` or higher. If `package.json` pi
 ## Component reference (use these, not raw HTML)
 
 ### Form
-`UCheckbox` `UCheckboxGroup` `UColorPicker` `UFileUpload` `UForm` `UFormField` `UInput` `UInputDate` `UInputMenu` `UInputNumber` `UInputTags` `UInputTime` `UListbox` `UPinInput` `URadioGroup` `USelect` `USelectMenu` `USlider` `USwitch` `UTextarea`
+`UCheckbox` `UCheckboxGroup` `UColorPicker` `UFileUpload` `UForm` `UFormField` `UInput` `UInputDate` `UInputMenu` `UInputNumber` `UInputRating` `UInputTags` `UInputTime` `UListbox` `UPinInput` `URadioGroup` `USelect` `USelectMenu` `USlider` `USwitch` `UTextarea`
 
 ### Layout
-`UApp` `UContainer` `UError` `UFooter` `UHeader` `UMain` `USidebar` `UTheme`
+`UApp` `UContainer` `UError` `UFooter` `UHeader` `UMain` `USidebar` `USplitter` `UTheme`
 
 ### Navigation
 `UBreadcrumb` `UCommandPalette` `UFooterColumns` `ULink` `UNavigationMenu` `UPagination` `UStepper` `UTabs`
 
 ### Overlay
-`UContextMenu` `UDrawer` `UDropdownMenu` `UModal` `UPopover` `USlideover` `UToast` `UToaster` `UTooltip`
+`UContextMenu` `UDrawer` `UDropdownMenu` `UModal` `UPopover` `USlideover` `UToast` `UTooltip`
+
+The toaster is rendered by `UApp`; configure it through the `UApp` `toaster` prop (`position` / `duration` / `max`), do not mount a toaster yourself.
 
 ### Data
 `UAccordion` `UCarousel` `UEmpty` `UMarquee` `UScrollArea` `UTable` `UTimeline` `UTree` `UUser`
 
 ### Feedback / Element
-`UAlert` `UAvatar` `UAvatarGroup` `UBadge` `UBanner` `UButton` `UCalendar` `UCard` `UChip` `UCollapsible` `UFieldGroup` `UIcon` `UKbd` `UProgress` `USeparator` `USkeleton`
+`UAlert` `UAvatar` `UAvatarGroup` `UBadge` `UBanner` `UButton` `UCalendar` `UCard` `UChip` `UCollapsible` `UFieldGroup` `UIcon` `UKbd` `UProgress` `UProgressGroup` `USeparator` `USkeleton`
 
 ### Specialized
 
@@ -58,7 +60,7 @@ Apply only when the project uses `@nuxt/ui ^4.0` or higher. If `package.json` pi
 
 - Raw `<button>` for any clickable trigger — use `UButton` (props: `color`, `variant`, `size`, `loading`, `disabled`, `to`, `icon`, `trailing-icon`)
 - Raw `<input>` / `<textarea>` / `<select>` for form fields — use `UInput` / `UTextarea` / `USelect` / `USelectMenu`
-- Raw `<dialog>` / hand-rolled "isOpen" boolean overlays — use `UModal` / `USlideover` / `UDrawer`
+- Raw `<dialog>` / hand-rolled "isOpen" boolean overlays — use `UModal` / `USlideover` / `UDrawer` bound with `v-model:open`, or open `UModal` / `USlideover` programmatically via `useOverlay()`
 - Raw `<table>` with hand-coded sorting/filtering — use `UTable` (built-in column definition, sort, filter, pagination)
 - Manual notifications via `<div class="toast">` — use `UToast` via the `useToast()` composable
 - Hand-coded breadcrumbs / pagination / tabs — use `UBreadcrumb` / `UPagination` / `UTabs`
@@ -76,6 +78,8 @@ Entry CSS:
 @import "@nuxt/ui";
 ```
 
+### Nuxt
+
 `nuxt.config.ts`:
 ```ts
 export default defineNuxtConfig({
@@ -88,6 +92,46 @@ export default defineNuxtConfig({
 
 Component prefix (default `U`) configurable via `ui.prefix`.
 
+### Vue (Vite)
+
+Install `@nuxt/ui` and `tailwindcss`, then `vite.config.ts`:
+```ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import ui from '@nuxt/ui/vite'
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    ui()
+  ]
+})
+```
+
+`src/main.ts` (import the entry CSS here):
+```ts
+import './assets/css/main.css'
+
+import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import ui from '@nuxt/ui/vue-plugin'
+import App from './App.vue'
+
+const app = createApp(App)
+
+const router = createRouter({
+  routes: [],
+  history: createWebHistory()
+})
+
+app.use(router)
+app.use(ui)
+
+app.mount('#app')
+```
+
+Wrap `src/App.vue` in `<UApp>` and add `class="isolate"` to the root container in `index.html` (`<div id="app" class="isolate"></div>`). Components and composables are auto-imported via `unplugin-vue-components` / `unplugin-auto-import`; component prefix configurable via `ui({ prefix })`.
+
 ## When no Nuxt UI component fits
 
 Do not silently fall back to raw HTML. **STOP** and report:
@@ -99,15 +143,15 @@ Do not silently fall back to raw HTML. **STOP** and report:
 ```bash
 # should be replaced with Nuxt UI equivalents
 grep -rE '<button[^>]*>' --include='*.vue' .              # → UButton
-grep -rE '<input(?!\s+v-bind)' --include='*.vue' .        # → UInput
+grep -rE '<input([[:space:]]|/?>|$)' --include='*.vue' .  # → UInput
 grep -rE '<select[^>]*>' --include='*.vue' .              # → USelect / USelectMenu
 grep -rE '<textarea[^>]*>' --include='*.vue' .            # → UTextarea
 grep -rE '<dialog[^>]*>' --include='*.vue' .              # → UModal
 grep -rE '<table[^>]*>' --include='*.vue' .               # → UTable
-grep -rE 'v-if="(isOpen|showModal|dialogOpen)"' --include='*.vue' .  # → UModal v-model
+grep -rE 'v-if="(isOpen|showModal|dialogOpen)"' --include='*.vue' .  # → UModal v-model:open / useOverlay()
 
 # anti-patterns that should not appear
-grep -rE ':deep\(\.u-' --include='*.vue' .                # internal class override — use the ui prop
+grep -rE ':deep\(' --include='*.vue' .                    # internal style override — use the ui prop
 grep -rE 'class="(toast|modal|dropdown)' --include='*.vue' .  # custom component name collision
 ```
 
