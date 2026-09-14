@@ -14,7 +14,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets Tailwind CSS v4 · verified 2026-07 (latest 4.3.3). v3 syntax still outnumbers v4 in training data, which is what this skill exists to counteract.
+> Targets Tailwind CSS v4 · verified 2026-09 (latest 4.3.3). v3 syntax still outnumbers v4 in training data, which is what this skill exists to counteract.
 
 This skill enforces Tailwind CSS v4 conventions. The rule is utility-first: express styling through class composition, not raw CSS files.
 
@@ -40,8 +40,8 @@ Apply only when the project uses `tailwindcss ^4.0` or higher. If `package.json`
 
 ### CSS authoring
 
-- `<style scoped>` in component files, scattered raw `.css/.scss`. **Allowed**: entry CSS may have `@layer components { ... }` for reusable composite classes and `@layer base { ... }` for preflight overrides.
-- `[var(--xxx)]` for variable arbitrary values — use `(--xxx)` parens. Square brackets are for **static** values only (`w-[500px]`, `grid-cols-[max-content_auto]`).
+- `<style scoped>` (including `<style lang="scss" scoped>`) in component files, scattered raw `.css/.scss`. **Allowed**: entry CSS may have `@layer components { ... }` for reusable composite classes and `@layer base { ... }` for preflight overrides.
+- `[--xxx]` (v3 variable shorthand, replaced by parens in v4) and `[var(--xxx)]` (still valid, but verbose) — use `(--xxx)` parens. Square brackets are for **static** values only (`w-[500px]`, `grid-cols-[max-content_auto]`).
 - `theme()` function in CSS — use `var(--color-xxx)` or `--alpha(var(--color-xxx) / 50%)`.
 - `!flex` prefix important — use `flex!` suffix.
 - Static inline `style="..."` for things expressible as utilities. **Allowed**: dynamic runtime values (props/state) may combine inline style for the dynamic part with utility class for the static part.
@@ -54,21 +54,29 @@ Apply only when the project uses `tailwindcss ^4.0` or higher. If `package.json`
 
 | ❌ Don't write | ✅ Use instead |
 |---|---|
-| `bg-opacity-50` / `text-opacity-*` and other `*-opacity-*` | `bg-color/50` / `text-color/50` (slash opacity) |
-| `flex-shrink-*` / `flex-grow-*` | `shrink-*` / `grow-*` |
+| `bg-opacity-50` / `text-opacity-*` / `border-opacity-*` / `divide-opacity-*` / `ring-opacity-*` / `placeholder-opacity-*` | `bg-color/50` / `text-color/50` (slash opacity) |
+| `flex-shrink` / `flex-grow` (bare or `-*`) | `shrink` / `grow` (bare or `-*`) |
 | `bg-gradient-to-r` | `bg-linear-to-r` |
-| `outline-none` | `outline-hidden` |
+| `focus:outline-none` to hide the focus outline (v3 meaning) | `focus:outline-hidden` (keeps an outline in forced-colors mode). v4 `outline-none` is a valid utility that sets `outline-style: none` |
 | `shadow-sm` / `shadow` (scale shifted down) | `shadow-xs` / `shadow-sm` |
-| `rounded-sm` / `blur-sm` | `rounded-xs` / `blur-xs` |
+| `drop-shadow-sm` / `drop-shadow` | `drop-shadow-xs` / `drop-shadow-sm` |
+| `rounded-sm` / `rounded`, `blur-sm` / `blur`, `backdrop-blur-sm` / `backdrop-blur` | `rounded-xs` / `rounded-sm`, `blur-xs` / `blur-sm`, `backdrop-blur-xs` / `backdrop-blur-sm` |
 | `ring` (default 3px blue-500) | `ring-3 ring-blue-500` (default is now 1px currentColor) |
 | `!flex` (prefix important) | `flex!` (suffix important) |
 | `first:*:pt-0` (variant right→left) | `*:first:pt-0` (variant left→right) |
 | `@layer utilities { .x {} }` | `@utility x {}` |
-| `theme(spacing.12)` | `var(--spacing-12)` or `--spacing(12)` |
+| `theme(spacing.12)` | `--spacing(12)` (the default theme defines only `--spacing`, no `--spacing-12`) |
+| `bg-[--brand-color]` (v3 variable shorthand) | `bg-(--brand-color)` |
 | `overflow-ellipsis` | `text-ellipsis` |
 | `decoration-slice` / `decoration-clone` | `box-decoration-slice` / `box-decoration-clone` |
-| `space-y-*` (descendant selector) | `flex flex-col gap-*` (more predictable) |
+| `start-*` / `end-*` (deprecated in 4.2) | `inset-s-*` / `inset-e-*` |
+| `break-words` | `wrap-break-word` |
+| `order-none` | `order-0` |
+| `bg-left-top` / `object-left-top` and other `{left,right}-{top,bottom}` | `bg-top-left` / `object-top-left` (`{top,bottom}-{left,right}`) |
+| `focus:transform-none` to reset `rotate-*` / `scale-*` / `translate-*` | `focus:rotate-none` / `focus:scale-none` / `focus:translate-none` (they use individual properties now) |
 | `border` defaulting to gray-200 | explicit `border-gray-200` (default is now `currentColor`) |
+
+`space-x-*` / `space-y-*` are not deprecated (v4 selector `:where(& > :not(:last-child))`), but they only fit simple stacks. For grids, wrapping layouts, children in a custom order, or together with `divide-*`, prefer `gap-*` on a flex/grid parent.
 
 ## When utilities are not enough
 
@@ -99,13 +107,15 @@ Even in Vue / React / Svelte, custom CSS is the official first choice — not a 
 | Third-party widget injects DOM you don't render (Select2, Flatpickr, FullCalendar, chart tooltips, Tiptap, datepickers, etc.) | `@layer components { .select2-dropdown { ... } }` — official example |
 | Markdown / CMS / WYSIWYG rendered HTML (no per-element component) | `@layer components { .prose h1 { ... } .prose p { ... } }` |
 | SVG charts where the library emits hardcoded class names (D3, ECharts, Chart.js inner SVG) | `@layer components` with descendant selectors |
-| Element-level resets (button cursor, placeholder color, scrollbar, list reset) | `@layer base { button { cursor: pointer } }` |
-| Global pseudo-elements (`::selection`, `::-webkit-scrollbar`, `::placeholder`) | `@layer base` |
+| Element-level resets (button cursor, placeholder color, list reset) | `@layer base { button { cursor: pointer } }` |
+| Global pseudo-elements (`::selection`, `::placeholder`, `::-webkit-scrollbar` parts the scrollbar utilities cannot reach) | `@layer base` |
 | `@font-face`, `@keyframes` definitions | top-level CSS; animation tokens go in `@theme` |
 | New atomic CSS feature Tailwind doesn't ship | `@utility name { ... }` — not `@layer components` |
 | Theme tokens (colors, spacing, shadows, easings) | `@theme { --color-x: ... }` — not a class |
 
 Official wording: "Using Tailwind you probably don't need these types of classes as often as you think" — meaning project-internal `.btn` / `.card` are usually replaceable by components, but the rows above are the cases that **do** still need custom CSS, and rightfully so.
+
+Scrollbars are not on that list: since 4.3 use `scrollbar-thin` / `scrollbar-none` / `scrollbar-auto`, `scrollbar-thumb-*` / `scrollbar-track-*` for color, and `scrollbar-gutter-*` (e.g. `scrollbar-gutter-stable`). Reach for `::-webkit-scrollbar` only for what these cannot express.
 
 ## Complex arbitrary values → @theme token
 
@@ -140,21 +150,21 @@ Naming: `@container/main` + `@sm/main:`. Arbitrary sizes: `@min-[475px]:` / `@ma
 
 ## Source detection & references
 
-Tailwind v4 auto-scans every file except: anything in `.gitignore`, `node_modules`, binaries, CSS, and lock files. Extend with `@source "../path"` (e.g. a shared UI package in a monorepo). Single-file `<style>` blocks that need `@apply` or `@variant` must add `@reference "../app.css";` at the top.
+Tailwind v4 auto-scans every file except: anything in `.gitignore`, `node_modules`, binaries, CSS, and lock files. Extend with `@source "../path"` (e.g. a shared UI package in a monorepo), exclude with `@source not "../path"`. The v3 `safelist` option is gone — force classes that appear in no source file with `@source inline("{hover:,focus:,}underline")`. Single-file `<style>` blocks that need `@apply` or `@variant` must add `@reference "../app.css";` at the top.
 
 Full syntax: https://tailwindcss.com/docs
 
 ## Verification (grep after every styling change)
 
 ```bash
-grep -rE '\[var\(--' .                       # should use (--xxx)
-grep -r '<style scoped>' .                   # remove — switch to utilities or @layer components
-grep -r '@tailwind ' .                       # should use @import "tailwindcss"
-grep -rE '@variants|@responsive|@screen' .  # deprecated
-grep -rE 'bg-opacity-|text-opacity-|flex-shrink-|flex-grow-' .
-grep -r 'bg-gradient-to-' .                  # should use bg-linear-to-
-grep -rE 'class="[^"]*![a-z]' .              # prefix important
-grep -rE 'class="[^"]*(text|p|m|w|h)-\[[0-9]' .  # numeric arbitrary values
-grep -r 'darkMode:' .                        # should migrate to @custom-variant
-grep -r '@tailwindcss/postcss' .             # Vite projects should use @tailwindcss/vite
+grep -rnE --exclude-dir={node_modules,dist,.git} -e '-\[--[a-zA-Z]' .   # v3 shorthand [--x], should use (--x)
+grep -rnE --exclude-dir={node_modules,dist,.git} '<style[^>]*[[:space:]]scoped' .   # remove — switch to utilities or @layer components
+grep -rn --exclude-dir={node_modules,dist,.git} '@tailwind ' .   # should use @import "tailwindcss"
+grep -rnE --exclude-dir={node_modules,dist,.git} '@variants|@responsive|@screen' .   # deprecated
+grep -rnE --exclude-dir={node_modules,dist,.git} '(bg|text|border|divide|ring|placeholder)-opacity-|(^|[[:space:]"'\''`:])flex-(grow|shrink)([-[:space:]"'\''`]|$)' .   # slash opacity, grow/shrink
+grep -rn --exclude-dir={node_modules,dist,.git} 'bg-gradient-to-' .   # should use bg-linear-to-
+grep -rnE --exclude-dir={node_modules,dist,.git} '["'\''`]([^"'\''`,&|?(){}=:]*[[:space:]])?([a-z0-9-]+:)*![a-z]' .   # prefix important inside class strings, should be suffix
+grep -rnE --exclude-dir={node_modules,dist,.git} '(^|[[:space:]"'\''`:])-?(text|p[xytrblse]?|m[xytrblse]?|gap(-[xy])?|space-[xy])-\[[0-9.]+(px|rem|em)?\]' .   # numeric font-size/spacing arbitrary values, use tokens
+grep -rn --exclude-dir={node_modules,dist,.git} 'darkMode:' .   # should migrate to @custom-variant
+grep -rn --exclude-dir={node_modules,dist,.git} '@tailwindcss/postcss' .   # Vite projects should use @tailwindcss/vite
 ```

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lockstep-tailwind",
   "description": "Strict Tailwind CSS v4 utility-first conventions. Auto-activates on .vue/.astro/.html/.tsx/.jsx/.css; utility classes in the template, v4 syntax and oklch() colors, raw CSS only where utilities cannot reach.",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
