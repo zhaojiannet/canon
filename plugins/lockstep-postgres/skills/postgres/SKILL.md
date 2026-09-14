@@ -14,7 +14,7 @@ allowed-tools:
   - Grep
 ---
 
-> Targets PostgreSQL 18 · verified 2026-07 (latest 18.4). The DDL rules below also hold on 14–17, which upstream still supports.
+> Targets PostgreSQL 18 · verified 2026-09 (latest 18.6). The DDL rules below also hold on 14–17, which upstream still supports.
 
 This skill covers two sides of PostgreSQL DDL: **schema design** (naming and shape) and **migration safety** (change-safety). The rules: tables follow a consistent shape, and every migration runs on a live production database without downtime. If a change cannot, **STOP** and ask first. For one-off data fixes not bound for production schema, say so explicitly so this skill relaxes.
 
@@ -24,7 +24,7 @@ This skill covers two sides of PostgreSQL DDL: **schema design** (naming and sha
 
 - **Table names**: `snake_case`, plural noun. `users`, `order_items`. Not `User`, `OrderItem`, `tbl_user`.
 - **Column names**: `snake_case`. `created_at`, `email_address`, `is_active`. No camelCase.
-- **Primary key**: always `id`. `BIGSERIAL` for auto-increment, `UUID` (with `gen_random_uuid()` default) for distributed/external-facing.
+- **Primary key**: always `id`. `BIGSERIAL` for auto-increment, `UUID` (with `gen_random_uuid()` default) for distributed/external-facing. (The SQL-standard identity column and PG 18's time-ordered `uuidv7()` also exist; this skill keeps the choices above.)
 - **Foreign keys**: `<referenced_table_singular>_id`. `users.org_id` references `organizations.id`.
 - **Boolean columns**: prefix with `is_` / `has_`. `is_active`, `has_paid`. Default a sensible value, not nullable.
 - **Timestamp columns**: `created_at`, `updated_at`, `deleted_at` (if soft delete). All `timestamptz`, never `timestamp`. Default `now()`.
@@ -63,7 +63,8 @@ ALTER TABLE orders ADD CONSTRAINT orders_user_id_fkey
   ON DELETE RESTRICT;
 ```
 
-- `RESTRICT` (default) — cannot delete parent if children exist
+- `NO ACTION` (default when `ON DELETE` is omitted) — deleting a referenced parent fails if children still exist, but the check can be deferred to later in the transaction
+- `RESTRICT` — stricter than `NO ACTION`: prevents deleting a referenced parent, and the check cannot be deferred
 - `CASCADE` — delete children with parent
 - `SET NULL` — make children orphans (column must be nullable)
 
@@ -124,10 +125,10 @@ The rule: every migration runs on a live production database without downtime. I
 
 ## Core principles
 
-- **Always wrap in a transaction**: `BEGIN; ...; COMMIT;`. A failed step rolls back. Some migrations cannot run inside a transaction (`CREATE INDEX CONCURRENTLY`, `ALTER TYPE ... ADD VALUE`); put these in their own migration file.
+- **Always wrap in a transaction**: `BEGIN; ...; COMMIT;`. A failed step rolls back. Some statements cannot run inside a transaction block (`CREATE INDEX CONCURRENTLY`); put these in their own migration file. `ALTER TYPE ... ADD VALUE` can run inside a transaction, but the new enum value cannot be used until that transaction commits; use it in a later migration.
 - **Idempotent guards**: `IF EXISTS` on `DROP`, `IF NOT EXISTS` on `CREATE`. A migration that fails halfway should be safe to retry.
-- **No long locks during business hours**: `ALTER TABLE` that rewrites the entire table (adding a `NOT NULL` column without a default before PG 11, changing column type) takes an `AccessExclusiveLock` and blocks reads.
-- **Never lose data without explicit approval**: `DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `DELETE` without `WHERE`, `ALTER TYPE ... DROP VALUE` are destructive. STOP and ask the user before writing them.
+- **No long locks during business hours**: `ALTER TABLE` that rewrites the entire table (adding a column with a default before PG 11, adding a column with a volatile default such as `clock_timestamp()`, changing column type) takes an `AccessExclusiveLock` and blocks reads.
+- **Never lose data without explicit approval**: `DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `DELETE` without `WHERE`, removing an enum value (there is no `DROP VALUE`; it takes dropping and re-creating the enum type) are destructive. STOP and ask the user before writing them.
 
 ## Exact patterns
 
@@ -135,7 +136,7 @@ Adding a `NOT NULL` column, renaming a column, or creating an index on a live ta
 
 ## When the change is destructive
 
-`DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `DELETE` without `WHERE`, `ALTER TYPE DROP VALUE`: these can lose data. **STOP** and report:
+`DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, `DELETE` without `WHERE`, dropping and re-creating an enum type to remove a value: these can lose data. **STOP** and report:
 
 > Migration [filename] contains [destructive op]. Confirm:
 > 1. The data is no longer needed (or has been backed up).
@@ -146,20 +147,27 @@ Adding a `NOT NULL` column, renaming a column, or creating an index on a live ta
 # Verification (grep after every schema/migration change)
 
 ```bash
+# SQL files under this skill's paths
+sqlfiles() { find . -type f -name '*.sql' \( -path '*/migrations/*' -o -path '*/schema/*' -o -path '*/migrate/*' -o -path '*/sqitch/*' \) -not -path '*/node_modules/*' -print0; }
+sqlgrep() { sqlfiles | xargs -0 grep -HnE "$@"; }
+
 # schema shape
-grep -rnE '\btimestamp\b' --include='*.sql' migrations/ schema/ 2>/dev/null | grep -vE 'timestamptz|timestamp with time zone'  # should be timestamptz
-grep -rnE 'SERIAL\s+PRIMARY' --include='*.sql' migrations/ 2>/dev/null                       # should be BIGSERIAL
-grep -rnE '\bJSON\s+(NOT NULL|DEFAULT|,|$)' --include='*.sql' migrations/ 2>/dev/null         # should be JSONB
-grep -rnE '\b[a-z]+[A-Z][a-zA-Z]*\b' --include='*.sql' migrations/ 2>/dev/null                # camelCase
-grep -rnE 'tbl_|col_' --include='*.sql' migrations/ 2>/dev/null                                # table/column prefixes
+sqlgrep -i '\btimestamp\b' | grep -viE 'timestamptz|\btimestamp\s*(\([0-9]+\))?\s+with\s+time\s+zone'   # should be timestamptz
+sqlgrep -i '\b(smallserial|serial|serial2|serial4)\b'                                                    # should be BIGSERIAL
+sqlgrep -i '\bjson\b\s*($|[,;)]|\[|not\b|null\b|default\b|check\b|using\b|collate\b)'                     # should be JSONB
+sqlgrep '\b[a-z]+[A-Z][a-zA-Z]*\b'                                                                       # camelCase
+sqlgrep -i '\b(tbl|col)_'                                                                                # table/column prefixes
 
 # migration safety
-grep -rnE 'DROP\s+TABLE' --include='*.sql' migrations/ 2>/dev/null | grep -vi 'IF EXISTS'
-grep -rnE '^\s*TRUNCATE\b' --include='*.sql' migrations/ 2>/dev/null
-grep -rnE 'DELETE\s+FROM\s+\w+\s*;' --include='*.sql' migrations/ 2>/dev/null                  # DELETE without WHERE
-grep -rnE 'ADD\s+COLUMN\s+\w+\s+\w+\s+NOT\s+NULL\s*;' --include='*.sql' migrations/ 2>/dev/null # no default value
-grep -rnE '^\s*CREATE\s+INDEX\s+' --include='*.sql' migrations/ 2>/dev/null | grep -v 'CONCURRENTLY'
-grep -rL 'BEGIN' migrations/*.sql 2>/dev/null                                                   # missing transaction wrapper
+sqlgrep -i '\bdrop\s+table\b'                                                                            # destructive, approval needed even with IF EXISTS
+sqlgrep -i '^\s*truncate\b'
+sqlgrep -i '\bdelete\s+from\s+[a-z0-9_."]+\s*;'                                                          # DELETE without WHERE
+sqlgrep -i '\badd\s+column\s+(if\s+not\s+exists\s+)?[a-z0-9_"]+\s[^;]*\bnot\s+null\b' | grep -viE '\bdefault\b'   # NOT NULL without default
+sqlgrep -i '^\s*create\s+(unique\s+)?index\s' | grep -viE '\bconcurrently\b' | while IFS=: read -r f n line; do   # blocking index on a table this file did not create
+  t=$(printf '%s\n' "$line" | sed -nE 's/.*[[:space:]][oO][nN][[:space:]]+([oO][nN][lL][yY][[:space:]]+)?([a-zA-Z0-9_."]+).*/\2/p')
+  [ -n "$t" ] && grep -qiE "create\s+table\s+(if\s+not\s+exists\s+)?$t([^a-z0-9_]|$)" "$f" || echo "$f:$n:$line"
+done
+sqlfiles | xargs -0 grep -LiE --null '^\s*(begin(\s+(transaction|work))?|start\s+transaction)(\s+isolation\s+level\s+[a-z ]+)?\s*;' | xargs -0 grep -LiE '\bconcurrently\b' | grep -v '/schema/'   # migration without BEGIN (CONCURRENTLY files and schema/ exempt)
 ```
 
 Reference: https://www.postgresql.org/docs/current/ddl.html · https://www.postgresql.org/docs/current/sql-altertable.html
