@@ -12,7 +12,7 @@ A Claude Code plugin marketplace named `canon` (from *canonical* — "do it the 
 
 | Plugin | Governs | How it applies |
 |---|---|---|
-| **`lockstep-*`** (9 framework plugins) | Code conventions: one plugin per framework, enforcing the latest stable official practices for Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL, and forbidding deprecated patterns | Auto-activates by `paths` when you edit matching files |
+| **`lockstep-*`** (9 framework plugins) | Code conventions: one plugin per framework, enforcing the latest stable official practices for Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL, and forbidding deprecated patterns | Auto-activates when Claude works with files matching `paths` |
 | **`flow`** | Four manual workflow commands: `go`, `cm`, `e2e`, `pin` | Invoke manually: `/flow:go`, `/flow:cm`, `/flow:e2e`, `/flow:pin` |
 | **`plain-chinese`** | Chinese writing: forces plain Simplified Chinese, bans internet/workplace buzzwords and AI-tic phrasing, keeps real technical terms | An output style, always on once enabled |
 
@@ -172,7 +172,7 @@ claude --plugin-dir ~/Cores/Projects/canon/plugins/lockstep-vue \
        --plugin-dir ~/Cores/Projects/canon/plugins/plain-chinese
 ```
 
-After editing a SKILL.md or output style, run `/reload-plugins` in the running Claude Code to apply it. Validate structure: `claude plugin validate .` (checks marketplace.json) plus `claude plugin validate ./plugins/<plugin>` for each plugin (checks plugin.json and skill frontmatter).
+Edits to a SKILL.md take effect immediately in the current session; after editing an output style, hooks or other components, run `/reload-plugins` in the running Claude Code. Validate structure: `claude plugin validate .` (checks marketplace.json) plus `claude plugin validate ./plugins/<plugin>` for each plugin (checks plugin.json and skill frontmatter).
 
 > Note: don't put `": "` (colon + space) in a skill's `description` — YAML reads it as a nested mapping and the whole frontmatter fails to parse.
 

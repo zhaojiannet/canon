@@ -12,7 +12,7 @@
 
 | Plugin | 何を管理するか | どう効くか |
 |---|---|---|
-| **`lockstep-*`**（9 個のフレームワーク plugin） | コードの書き方：1 フレームワークにつき 1 plugin。Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL をそれぞれの公式最新安定版の推奨パターンに強制し、deprecated な書き方を禁止 | 対応するファイルを編集すると `paths` に従って自動的に有効化 |
+| **`lockstep-*`**（9 個のフレームワーク plugin） | コードの書き方：1 フレームワークにつき 1 plugin。Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL をそれぞれの公式最新安定版の推奨パターンに強制し、deprecated な書き方を禁止 | `paths` に一致するファイルを扱うときに自動的に有効化 |
 | **`flow`** | 手動ワークフローコマンド `go`/`cm`/`e2e`/`pin` の 4 つ | `/flow:go`、`/flow:cm`、`/flow:e2e`、`/flow:pin` で手動呼び出し |
 | **`plain-chinese`** | 中国語の表現：平易な中国語を強制し、ネット隠語・職場隠語・AI 口調を禁止しつつ、本物の専門用語は保持 | 一つの output-style で、有効にすると常に効く |
 
@@ -172,7 +172,7 @@ claude --plugin-dir ~/Cores/Projects/canon/plugins/lockstep-vue \
        --plugin-dir ~/Cores/Projects/canon/plugins/plain-chinese
 ```
 
-SKILL.md や output-style を編集したら、起動中の Claude Code で `/reload-plugins` を実行すれば反映されます。構造を検証するには：`claude plugin validate .`（marketplace.json を検証）+ 各 plugin に対して `claude plugin validate ./plugins/<plugin>`（plugin.json と skill frontmatter を検証）。
+SKILL.md の編集は現在のセッションにすぐ反映されます。output-style や hooks など他のコンポーネントを編集したら、起動中の Claude Code で `/reload-plugins` を実行します。構造を検証するには：`claude plugin validate .`（marketplace.json を検証）+ 各 plugin に対して `claude plugin validate ./plugins/<plugin>`（plugin.json と skill frontmatter を検証）。
 
 > 注意：skill の `description` に `": "`（コロン + 空白）を入れないでください。YAML がネストしたマッピングとして解釈し、frontmatter 全体のパースが失敗します。
 

@@ -12,7 +12,7 @@
 
 | 插件 | 管什麼 | 怎麼生效 |
 |---|---|---|
-| **`lockstep-*`**（9 個框架插件） | 程式碼寫法：一框架一插件，強制 Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL 用各自官方最新穩定版的推薦做法，禁用已廢棄寫法 | 編輯對應檔案時按 `paths` 自動啟用 |
+| **`lockstep-*`**（9 個框架插件） | 程式碼寫法：一框架一插件，強制 Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL 用各自官方最新穩定版的推薦做法，禁用已廢棄寫法 | 處理符合 `paths` 的檔案時自動啟用 |
 | **`flow`** | 四個手動工作流命令 `go`/`cm`/`e2e`/`pin` | 手動呼叫 `/flow:go`、`/flow:cm`、`/flow:e2e`、`/flow:pin` |
 | **`plain-chinese`** | 中文表達：強制平實中文，禁網路黑話、職場黑話和 AI 腔，保留真正的專業術語 | 一個 output-style，啟用後一直生效 |
 
@@ -172,7 +172,7 @@ claude --plugin-dir ~/Cores/Projects/canon/plugins/lockstep-vue \
        --plugin-dir ~/Cores/Projects/canon/plugins/plain-chinese
 ```
 
-改完 SKILL.md 或 output-style 後，在已執行的 Claude Code 內執行 `/reload-plugins` 生效。校驗結構：`claude plugin validate .`（校驗 marketplace.json）+ 對每個插件 `claude plugin validate ./plugins/<插件>`（校驗 plugin.json 和 skill frontmatter）。
+改完 SKILL.md 在當前會話裡立即生效；改了 output-style、hooks 等其他元件，要在已執行的 Claude Code 內執行 `/reload-plugins`。校驗結構：`claude plugin validate .`（校驗 marketplace.json）+ 對每個插件 `claude plugin validate ./plugins/<插件>`（校驗 plugin.json 和 skill frontmatter）。
 
 > 注意：skill 的 `description` 裡不要出現 `": "`（冒號+空格），YAML 會把它當成巢狀對映、導致 frontmatter 整段解析失敗。
 
