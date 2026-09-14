@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lockstep-astro",
-  "description": "Strict Astro 7 static-first conventions. Auto-activates on .astro files; zero JS by default, the lightest client directive that works, getCollection over Astro.glob.",
-  "version": "0.7.0",
+  "description": "Strict Astro 7 static-first conventions. Auto-activates on .astro files; zero JS by default, the lightest client directive that works, getCollection over hand-rolled glob imports.",
+  "version": "0.7.1",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
