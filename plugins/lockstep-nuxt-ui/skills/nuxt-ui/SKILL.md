@@ -3,9 +3,6 @@ name: nuxt-ui
 description: Enforce Nuxt UI v4 component-first conventions. Use when editing .vue files or when the user mentions Nuxt UI, a U-prefix component (UButton, UModal, UForm, UTable…), or building any UI element. Reaches for the U-prefix component wherever Nuxt UI ships one, in place of hand-written button, input, dialog or table markup.
 paths:
   - "**/*.vue"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets Nuxt UI v4 · verified 2026-09 (latest 4.11.1).

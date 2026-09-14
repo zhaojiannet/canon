@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "lockstep-echo",
   "description": "Strict Echo v5 handler conventions for Go. Auto-activates on .go files; HTTPError + HTTPErrorHandler error model, no manual JSON error responses or swallowed errors, graceful shutdown.",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"

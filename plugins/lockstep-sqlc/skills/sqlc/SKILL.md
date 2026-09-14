@@ -6,9 +6,6 @@ paths:
   - "**/sqlc.yml"
   - "**/queries/*.sql"
   - "**/queries/**/*.sql"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets sqlc 1.31+ · verified 2026-09 (latest v1.31.1, released 2026-04-22).

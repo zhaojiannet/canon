@@ -3,9 +3,6 @@ name: echo
 description: Enforce Echo v5 handler conventions for Go, focused on error handling. Use when editing .go handler/route/middleware files or when the user mentions Echo, HandlerFunc, c.Bind, middleware, HTTPError, HTTPErrorHandler, error wrap, or graceful shutdown. Routes every failure through HTTPError and one central HTTPErrorHandler, matches errors with errors.Is/As, wraps and returns them, and starts the server with graceful shutdown.
 paths:
   - "**/*.go"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets Echo v5 · verified 2026-09 (latest v5.3.1, released 2026-07-21).

@@ -9,9 +9,6 @@ paths:
   - "**/*.jsx"
   - "**/*.css"
   - "**/*.scss"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets Tailwind CSS v4 · verified 2026-09 (latest 4.3.3). v3 syntax still outnumbers v4 in training data, which is what this skill exists to counteract.

@@ -3,9 +3,6 @@ name: astro
 description: Enforce Astro 7 static-first conventions. Use when editing .astro files or when the user mentions Astro, islands, hydration, client directives, server:defer, content collections, or getCollection. Ships zero JS by default and picks the lightest client directive that works — client:visible or client:idle ahead of client:load, getCollection ahead of hand-rolled glob imports.
 paths:
   - "**/*.astro"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets Astro 7 · verified 2026-09 (latest 7.3.2).

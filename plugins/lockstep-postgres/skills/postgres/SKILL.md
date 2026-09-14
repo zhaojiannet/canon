@@ -9,9 +9,6 @@ paths:
   - "**/migrate/*.sql"
   - "**/migrate/**/*.sql"
   - "**/sqitch/**/*.sql"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets PostgreSQL 18 · verified 2026-09 (latest 18.6). The DDL rules below also hold on 14–17, which upstream still supports.

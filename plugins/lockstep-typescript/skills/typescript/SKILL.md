@@ -4,9 +4,6 @@ description: Enforce TypeScript 7 strict type-checking. Use when editing .ts/.ts
 paths:
   - "**/*.ts"
   - "**/*.tsx"
-allowed-tools:
-  - Read
-  - Grep
 ---
 
 > Targets TypeScript 7 · verified 2026-09 (latest 7.0.2, released 2026-07-08).
