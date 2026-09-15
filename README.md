@@ -13,7 +13,7 @@
 | 插件 | 管什么 | 怎么生效 |
 |---|---|---|
 | **`lockstep-*`**（9 个框架插件） | 代码写法：一框架一插件，强制 Astro / Vue 3.5 / Nuxt UI v4 / Tailwind v4 / TypeScript / Echo v5 / sqlc / Fastify v5 / PostgreSQL 用各自官方最新稳定版的推荐做法，禁用已废弃写法 | 处理匹配 `paths` 的文件时自动激活 |
-| **`flow`** | 四个手动工作流命令 `go`/`cm`/`e2e`/`pin` | 手动调用 `/flow:go`、`/flow:cm`、`/flow:e2e`、`/flow:pin` |
+| **`flow`** | 工作流命令 `go`/`cm`/`e2e`/`pin`/`vet` | 前四个手动调用 `/flow:go`、`/flow:cm`、`/flow:e2e`、`/flow:pin`；`vet` 由 `cm` 在提交前自动调 |
 | **`plain-chinese`** | 中文表达：强制平实中文，禁互联网黑话、职场黑话和 AI 腔，保留真正的专业术语 | 一个 output-style，启用后一直生效 |
 
 **为什么框架拆成 9 个插件、而不是打包成一个**：插件是最小安装单元，装一个就把它的 skill 全带来、装的人挑不了。拆开后才能按项目技术栈单独装——写 Astro 站的项目只装 `lockstep-astro`，用不到的后端框架一个 token 不占（每个 skill 的描述会占 Claude 的 skill 列表预算）。
@@ -77,7 +77,7 @@
 
 ### 工作流命令：flow（手动触发）
 
-`flow` 插件含四个手动触发的工作流命令，设了 `disable-model-invocation: true`：只在你输入 `/` 时手动调用，Claude 不会自动触发，description 也不进 context、只当 `/` 菜单里的标签。
+`flow` 插件含四个手动触发的工作流命令，设了 `disable-model-invocation: true`：只在你输入 `/` 时手动调用，Claude 不会自动触发，description 也不进 context、只当 `/` 菜单里的标签。第五个 `vet` 是提交前的检查器，Claude 可以自己调，`cm` 在每个 commit 前都会调它。
 
 ```bash
 /plugin install flow@canon
@@ -90,8 +90,9 @@
 | `cm` | 把当前改动分批分类提交：以实际 `git diff` 为准分组（上下文里的任务列表只当线索）、默认合在一起不硬拆、一个 commit 只做一件事，commit message 按规范写，提交前列给你确认，未经同意不 push | `/flow:cm` |
 | `e2e` | 用现有账号和环境给当前项目做全量端到端测试：先读项目出画像（入口、账号、副作用分级、备份恢复、业务口径）→ 出计划等你审 → 按官方 `playwright-cli` skill 生成 Playwright spec → 每页横切面冒烟 → 独立容器里跑、失败先定性再修（应用 bug 只报不改）→ 出报告。计划里每条场景带状态，跨会话续做，收尾「待做」必须为 0。被测项目只多一个 `e2e/` 目录和一行 `.gitignore`，宿主机不装任何 Playwright 组件 | `/flow:e2e` |
 | `pin` | 把一个肉眼难确认的界面 bug（时序、偶发、多步交互）钉住再修：先写 Playwright spec 复现，按复现率决定跑几次 → 缩到最少步骤、列假设 → 按 `error-context.md` 和 trace 定位 → 改应用代码 → 只跑 grep 出的相关 spec，不跑全量。spec 留在 `e2e/tests/repro/` 作回归。改断言、缺备份命令、连续 3 次修不好时停下问你。容器沿用 `e2e` 的搭法 | `/flow:pin` |
+| `vet` | 提交前把关：用 `context: fork` 在一个看不到对话的子代理里跑，只拿 diff 和 message 草稿逐句核对，标出指不到 diff 的句子、仓库里找不到的编号、叙述过程或超长的注释、非中文。只报告不改文件。`cm` 每个 commit 前自动调；写代码中途也可以直接敲它只查注释 | `/flow:vet` |
 
-> 这四个是作者的个人工作流命令。`go` 是通用纪律，谁装都能用；`cm` 的 commit message 格式引用作者全局 `~/.claude/CLAUDE.md` 里的规范，你可以换成自己的提交规范；`e2e` 用官方 `playwright-cli` skill 做规划 / 生成 / 修复（由容器装进项目的 `e2e/` 内），运行环境搭法见 `plugins/flow/skills/e2e/references/runner.md`；`pin` 与 `e2e` 共用这个容器和 `references/` 下的定位、时序参考。
+> 这些是作者的个人工作流命令。`go` 是通用纪律，谁装都能用；`cm` 的 commit message 格式引用作者全局 `~/.claude/CLAUDE.md` 里的规范，你可以换成自己的提交规范；`e2e` 用官方 `playwright-cli` skill 做规划 / 生成 / 修复（由容器装进项目的 `e2e/` 内），运行环境搭法见 `plugins/flow/skills/e2e/references/runner.md`；`pin` 与 `e2e` 共用这个容器和 `references/` 下的定位、时序参考。
 
 ---
 

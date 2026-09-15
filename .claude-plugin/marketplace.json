@@ -11,7 +11,7 @@
     {
       "name": "flow",
       "source": "./plugins/flow",
-      "description": "Manual workflow commands: /flow:go (work discipline), /flow:cm (batched, spec-compliant commits), /flow:e2e (profile, plan, review, generate, run, heal, report end-to-end tests) and /flow:pin (reproduce a UI bug with a Playwright spec before fixing it).",
+      "description": "Manual workflow commands: /flow:go (work discipline), /flow:cm (batched, spec-compliant commits), /flow:e2e (profile, plan, review, generate, run, heal, report end-to-end tests) /flow:pin (reproduce a UI bug with a Playwright spec before fixing it) and /flow:vet (fresh-context check of commit messages and new comments against the diff).",
       "category": "development"
     },
     {
