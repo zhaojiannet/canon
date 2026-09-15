@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "plain-chinese",
   "description": "Forces plain, jargon-free Simplified Chinese in Claude Code's output. Bans internet and workplace buzzwords (根因, 兜底, 对齐, 抓手, 闭环, 赋能…) and AI-tic phrasing (不是X而是Y, 本质上, 综上所述) while keeping real technical terms. Ships as an output style; force-for-plugin applies it automatically once enabled.",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "author": {
     "name": "zhaoJian",
     "email": "x@zhaojian.net"
