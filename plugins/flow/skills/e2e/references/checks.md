@@ -67,4 +67,9 @@ const IGNORE: RegExp[] = []
 const BLOCKED_MARK = '[data-testid="forbidden"]'
 ```
 
-按项目改四处：`PAGES` 从画像的页面清单生成；应用壳选择器；缺 key 正则和 `IGNORE`；`BLOCKED_MARK` 按画像里定义的 403 页标识写。
+按项目改四处：
+
+- `PAGES`：从 plan.md 冒烟层的页面 × 角色生成。`role` 用 `auth.setup.ts` 存登录态时的同一个名字，`playwright/.auth/<role>.json` 必须存在。
+- 应用壳选择器：取画像「冒烟配置」一节。
+- 缺 key 正则和 `IGNORE`：取画像「冒烟配置」一节。
+- `BLOCKED_MARK`：取画像「冒烟配置」一节的 403 页标识。

@@ -54,6 +54,12 @@ Verified: 2026-09-12
 | 日志、缓存这类 e2e 覆盖不到的包 | 无 | |
 | `frontend/apps/dashboard/**`（其余） | `dashboard/` | 兜底，放在同一端的最后 |
 
+## 冒烟配置（checks.md 用）
+- 应用壳选择器：<如 `#__nuxt` / `main`>
+- 403 页标识：<选择器，如 `[data-testid="forbidden"]`；没有 403 页写「无」>
+- 控制台噪音白名单：<正则，每条写来源，如 CSP 拦掉的第三方统计脚本>
+- 缺 key 正则：<按项目 i18n 库的缺 key 表现写>
+
 ## 业务口径（断言要用的规则）
 - <例：税额必须经 effectiveTaxCategory(product, isTakeout) 算，前端不直接读 tax_category>
 - <例：多租户——A 店账号访问 B 店资源必须 403>
