@@ -105,6 +105,8 @@ setup('shop admin', async ({ page }) => {
 ```bash
 <exec> npx playwright test tests/dashboard/orders            # 跑一个模块
 <exec> npx playwright test --grep "<测试名>"                  # 单跑一条
+<exec> npx playwright test --grep 'dashboard/orders/[^ ]*\.spec\.ts|@critical' --no-deps   # 按改动挑，见 select.md
+<exec> npx playwright test --last-failed                      # 只重跑上一次失败的，会先重新登录
 <exec> sh -c 'PLAYWRIGHT_JSON_OUTPUT_NAME=run-$(date +%F).json npx playwright test --reporter=json'
 <exec> npx playwright cli open <url> / snapshot / fill e5 "x" / click e6 / --raw generate-locator e6
 <exec> npx playwright cli list / close / kill-all
