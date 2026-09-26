@@ -2,7 +2,7 @@
 
 核对：Playwright 1.63.0，2026-09。实测环境 OrbStack + 官方镜像。
 
-原则：Playwright 相关的一切只在一个独立容器里，宿主机零安装；文件全部落在项目根 `e2e/` 内（依赖、官方 skill、spec、账号、报告），项目目录外不放任何东西；被测项目除了 `e2e/` 和一行 `.gitignore` 什么都不改。`playwright-cli` 本身就在 `playwright-core` 里，`npx playwright cli` 就有它，不另装 `@playwright/cli`。
+原则见 SKILL.md「三条底线」第 1 条：Playwright 相关的一切只在这个独立容器里，文件全部落在项目根 `e2e/` 内。`playwright-cli` 本身就在 `playwright-core` 里，`npx playwright cli` 就有它，不另装 `@playwright/cli`。
 
 ## 一次性搭建
 
@@ -107,7 +107,7 @@ setup('shop admin', async ({ page }) => {
 <exec> npx playwright test --grep "<测试名>"                  # 单跑一条
 <exec> npx playwright test --grep 'dashboard/orders/[^ ]*\.spec\.ts|@critical' --no-deps   # 按改动挑，见 select.md
 <exec> npx playwright test --last-failed                      # 只重跑上一次失败的，会先重新登录
-<exec> sh -c 'PLAYWRIGHT_JSON_OUTPUT_NAME=run-$(date +%F).json npx playwright test --reporter=json'
+<exec> sh -c 'PLAYWRIGHT_JSON_OUTPUT_NAME=run-$(date +%F)-<模块>.json npx playwright test <模块> --reporter=json'
 <exec> npx playwright cli open <url> / snapshot / fill e5 "x" / click e6 / --raw generate-locator e6
 <exec> npx playwright cli list / close / kill-all
 ```
