@@ -47,7 +47,7 @@ Scope: 全量
     - expect: 状态变为 cancelled
     - expect: 列表页该单不再出现在未付筛选
 
-#### orders-2. merge-checkout-marks-paid  `状态: 待做`
+#### orders-2. merge-checkout-marks-paid  `状态: 待做`  `@critical`
 ...
 
 ### dashboard/finance/daily-close  `Skip: 3 級，日次締め不可逆`
@@ -66,3 +66,4 @@ Scope: 全量
 - 3 / 4 级的场景照样列出来标跳过——让人看到没测什么，比看不到强。
 - 有测试清单文档的项目，清单里每个「用户操作」都要在计划里找得到对应场景或跳过行；对不上的写进「待确认」。
 - 负向场景（错角色、错店、过期 token）每个模块至少一个。
+- 坏了就没法营业的流程（登录、下单、收银、支付）在场景标题后标 `@critical`，我审计划时确认。每次按改动挑测试都会带上它们，只标这类流程。

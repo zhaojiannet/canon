@@ -40,6 +40,20 @@ Verified: 2026-09-12
 
 3 / 4 级默认跳过；来源写清楚（文件 / 路由）。
 
+## 改动 → 测试（按改动挑测试时查，用法见 select.md）
+一行一个路径模式，第一条匹配的行生效，细的写在前面。「跑什么」填 spec 路径、模块目录，或 `smoke` / `全量` / `无`。
+| 改动路径 | 跑什么 | 说明 |
+|---|---|---|
+| `backend/cmd/**`、后端中间件、数据库访问层、`nuxt.config.ts` | 全量 | 路由注册和底层改动，影响所有页面 |
+| `backend/db/migrations/**`、生成的代码 | 无 | 跟着同一次改动里其他文件的映射走 |
+| `frontend/**/layouts/**`、共享组件目录 | smoke | |
+| 登录、鉴权相关页面和后端包 | `roles/`、`smoke` | |
+| `frontend/apps/dashboard/app/pages/orders/**` | `dashboard/orders/` | |
+| `frontend/apps/dashboard/app/components/Cash*` | `dashboard/orders/`、`pay/` | 收银弹窗在订单页和支付流程里都用 |
+| `backend/internal/payment/**` | `pay/` | |
+| 日志、缓存这类 e2e 覆盖不到的包 | 无 | |
+| `frontend/apps/dashboard/**`（其余） | `dashboard/` | 兜底，放在同一端的最后 |
+
 ## 业务口径（断言要用的规则）
 - <例：税额必须经 effectiveTaxCategory(product, isTakeout) 算，前端不直接读 tax_category>
 - <例：多租户——A 店账号访问 B 店资源必须 403>

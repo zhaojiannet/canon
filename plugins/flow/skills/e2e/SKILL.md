@@ -46,7 +46,7 @@ e2e/
 | 所有场景无「待做」 | 第 5 步 | — |
 | 今天已有 report | 说明已跑过，问要不要重跑 | 停 |
 
-带参数强制跳到某步：`profile`（对比 `git log` 自 Verified 日期以来路由 / 页面目录 / 账号文档的变动，只更新差异）、`plan [范围]`（范围如 `menu`、`smoke`、`dashboard/finance`，不写就是全量）、`generate [模块]`、`run [模块]`（平时改完代码用这个，只跑已有 spec）、`report`。
+带参数强制跳到某步：`profile`（对比 `git log` 自 Verified 日期以来路由 / 页面目录 / 账号文档的变动，只更新差异）、`plan [范围]`（范围如 `menu`、`smoke`、`dashboard/finance`，不写就是全量）、`generate [模块]`、`run [模块 | all]`（只跑已有 spec；平时改完代码用不带参数的 `run`，按 `references/select.md` 查画像里的对照表，只跑改动相关的 spec 加全部 `@critical`；`all` 才跑全量）、`report`。
 
 同一会话里我说「批准」，把 `Status: approved` 写进 plan.md 再往下走；换会话敲 `/e2e` 读磁盘接着来。全量是大活，一个会话做不完是正常的，状态在磁盘上不会丢。
 
@@ -54,7 +54,7 @@ e2e/
 
 读 CLAUDE.md、compose、路由注册、页面目录、已有测试清单 / 账号文档 / seed 脚本 / 已有 spec，按 `references/profile-template.md` 填 `profile.md`。能自己查的自己查（`curl` 看入口通不通、用 CLI 把每个账号登一遍），查不到的问我。
 
-必须停下让我确认的三项：账号表（哪些角色能登、哪些缺账号——缺的直接向我要）、备份与恢复命令、副作用清单的等级划分。
+必须停下让我确认的四项：账号表（哪些角色能登、哪些缺账号——缺的直接向我要）、备份与恢复命令、副作用清单的等级划分、「改动 → 测试」对照表。
 
 ## 1 计划
 
@@ -63,11 +63,12 @@ e2e/
 - 冒烟层直接从路由 / 页面清单生成，不探索。每个页面 × 每个角色一行。
 - 操作层：清单里每个写操作一条场景，按端 / 模块分组。有已有测试清单（如 `docs/test-inventory.md`）就以它为准，没有就自己从路由和页面抽。
 - 每条场景标账号、前置数据、副作用等级、清理方式。3 / 4 级默认列为跳过，原因写清。
+- 坏了就没法营业的流程标 `@critical`，按改动挑测试时每次都跑。
 - 只对步骤拿不准的场景用官方 planner 探索，其余从清单直接写。上百页面的项目盲探一次就是十几万 token。
 
 ## 2 生成
 
-按官方 §2 逐条生成到 `e2e/tests/<端>/<模块>/`。生成前先 grep 已有 spec 有没有同名或同流程的，有就改不新建。文件头写 `// spec: plan.md <编号>`。登录走 `auth.setup.ts` + `storageState`，每个角色一份。按模块分批，每批生成完立刻跑这批，状态写回 plan.md。
+按官方 §2 逐条生成到 `e2e/tests/<端>/<模块>/`。生成前先 grep 已有 spec 有没有同名或同流程的，有就改不新建。文件头写 `// spec: plan.md <编号>`。计划里标了 `@critical` 的场景写 `{ tag: '@critical' }`。登录走 `auth.setup.ts` + `storageState`，每个角色一份。按模块分批，每批生成完立刻跑这批，状态写回 plan.md。
 
 ## 3 横切面
 
@@ -76,7 +77,7 @@ e2e/
 ## 4 跑并修
 
 1. 按画像里的命令备份一次。备份失败就停，不往下跑。
-2. `<exec> npx playwright test [模块] --reporter=json`，输出存 `run-<日期>.json`。
+2. `<exec> npx playwright test [模块] --reporter=json`，输出存 `run-<日期>.json`。角色的登录态文件都在时加 `--no-deps`；这样跑出失败，先按 `references/select.md` 带登录重跑失败项：`<exec> sh -c 'PLAYWRIGHT_JSON_OUTPUT_NAME=run-<日期>-rerun.json npx playwright test --last-failed --reporter=json'`。仍失败的才进下一步。
 3. 每条失败 `--grep` 限定这一条，按 `references/diagnose.md` 的顺序查清原因。先定性再动手：
    - 测试写错（选择器、等待、断言）→ 改测试，重跑。
    - 环境（服务没起、账号登不上、前置数据不在）→ 能在底线内解决就解决；不能就标「阻塞」写进报告，继续下一条。
