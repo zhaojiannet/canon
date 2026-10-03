@@ -38,7 +38,7 @@ argument-hint: "[可选：限定文件或范围]"
 
 ## Message
 
-- 格式和禁忌照我全局 `~/.claude/CLAUDE.md` 里的 commit 规范。
+- 格式和禁忌照 `/flow:msg`。
 - 对着这个 commit 的 diff 写，对话只用来补 why。每句话都要指向 diff 里的某处改动，并说出看 diff 得不到的 why；做不到的句子删掉。
 - diff 之外能写的只有最终代码的 why：设计取舍、约束，包括为什么选这个做法、不选读者会想到的另一个。开发经过、试过又删掉的写法、会话待办的编号都不写。
 - 没有值得写的 why，就只写 subject。
